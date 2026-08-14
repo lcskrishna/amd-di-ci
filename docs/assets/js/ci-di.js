@@ -330,7 +330,6 @@
     return h('td', {
       style: {
         padding: '8px', verticalAlign: 'top',
-        background: mix(verdictColor(cell.last_verdict), 8),
         borderLeft: '3px solid ' + mix(verdictColor(cell.last_verdict), 55),
       },
     }, [
