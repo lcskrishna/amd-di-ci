@@ -84,22 +84,29 @@
     return h('div', { style: { marginBottom: '18px' } }, bits);
   }
 
-  function classChips(counts) {
-    return ['workload', 'bringup', 'infra', 'unknown'].filter(function (k) {
-      return counts[k];
-    }).map(function (k) {
-      var c = classColor(k);
-      return h('div', {
-        title: CLASS_HELP[k] || '',
-        style: {
-          border: '1px solid ' + mix(c, 40), background: mix(c, 10), borderRadius: '6px',
-          padding: '10px 14px', minWidth: '96px',
-        },
-      }, [
-        h('div', { text: String(counts[k]), style: { fontSize: '22px', fontWeight: '700', color: c } }),
-        h('div', { text: CLASS_LABEL[k] || k, style: { fontSize: '12px', color: 'var(--text-muted)' } }),
-      ]);
+  function chip(value, label, c, tip) {
+    return h('div', {
+      title: tip || '',
+      style: {
+        border: '1px solid ' + mix(c, 40), background: mix(c, 10), borderRadius: '6px',
+        padding: '10px 14px', minWidth: '96px',
+      },
+    }, [
+      h('div', { text: String(value), style: { fontSize: '22px', fontWeight: '700', color: c } }),
+      h('div', { text: label, style: { fontSize: '12px', color: 'var(--text-muted)' } }),
+    ]);
+  }
+
+  // Passed leads, then the failure classes. Showing only failures made a run
+  // of 18 infra rejections look identical whether the other two steps passed
+  // or were still queued.
+  function outcomeChips(passed, counts) {
+    var chips = [chip(passed, 'Passed', 'var(--accent-green)',
+      'Completed steps that passed.')];
+    ['workload', 'bringup', 'infra', 'unknown'].forEach(function (k) {
+      if (counts[k]) chips.push(chip(counts[k], CLASS_LABEL[k] || k, classColor(k), CLASS_HELP[k] || ''));
     });
+    return chips;
   }
 
   function column(title, body, note) {
@@ -131,26 +138,53 @@
     var last = (g.build_rollup || [])[0];
     if (!last) return null;
     var counts = {};
+    var passed = 0, completed = 0, pending = 0;
     Object.keys(last.models).forEach(function (m) {
       last.models[m].runs.forEach(function (r) {
-        if (r.verdict === 'passed' || !TERMINAL.has(r.verdict)) return;
+        if (!TERMINAL.has(r.verdict)) { pending += 1; return; }
+        completed += 1;
+        if (r.verdict === 'passed') { passed += 1; return; }
         var k = r.failure_class || 'unknown';
         counts[k] = (counts[k] || 0) + 1;
       });
     });
-    return { build_number: last.build_number, counts: counts };
+    return {
+      build_number: last.build_number, date: last.date,
+      counts: counts, passed: passed, completed: completed, pending: pending,
+    };
+  }
+
+  // Totals across every collected build. Derived from build_rollup so it
+  // agrees with the table below by construction.
+  function overallTotals(g) {
+    var passed = 0, completed = 0;
+    (g.build_rollup || []).forEach(function (b) {
+      Object.keys(b.models).forEach(function (m) {
+        passed += b.models[m].passed;
+        completed += b.models[m].completed;
+      });
+    });
+    return { passed: passed, completed: completed };
   }
 
   // The reason this dashboard exists: Buildkite says "14 failed", but most of
-  // those never ran a test. Lead with that split.
+  // those never ran a test. Lead with that split — and with how many passed,
+  // so a column of failure chips cannot be mistaken for the whole story.
   function failureClasses(g) {
     var fc = g.failure_classes || {};
-    if (!Object.keys(fc).length) return null;
+    var totals = overallTotals(g);
+    if (!Object.keys(fc).length && !totals.completed) return null;
 
     var onlyUnknown = Object.keys(fc).length === 1 && fc.unknown;
     var overallNote = onlyUnknown
       ? 'No SLURM verdicts yet — this pass ran with --no-logs. Re-run the collector with logs to split infra from real regressions.'
       : 'Every completed step across all collected builds, attributed from the SLURM driver’s own verdict line — which Buildkite’s red/green discards.';
+    var overallCol = column(
+      'Overall — ' + totals.passed + '/' + totals.completed + ' passed',
+      h('div', { style: { display: 'flex', gap: '10px', flexWrap: 'wrap' } },
+        outcomeChips(totals.passed, fc)),
+      overallNote
+    );
 
     var lastCol;
     var lb = lastBuildClasses(g);
@@ -159,16 +193,15 @@
         text: 'No builds collected.',
         style: { color: 'var(--text-muted)', fontSize: '13px' },
       }));
-    } else if (!Object.keys(lb.counts).length) {
-      lastCol = column('Why build #' + lb.build_number + ' failed', h('div', {
-        text: 'Nothing failed — every completed step passed.',
-        style: { color: 'var(--accent-green)', fontSize: '13px', fontWeight: '600' },
-      }));
     } else {
+      var lastNote = 'Most recent build only'
+        + (lb.pending ? ' — ' + lb.pending + ' step' + (lb.pending === 1 ? '' : 's')
+            + ' still running, not counted either way.' : '.');
       lastCol = column(
-        'Why build #' + lb.build_number + ' failed',
-        h('div', { style: { display: 'flex', gap: '10px', flexWrap: 'wrap' } }, classChips(lb.counts)),
-        'Failed steps in the most recent build only.'
+        'Build #' + lb.build_number + ' — ' + lb.passed + '/' + lb.completed + ' passed',
+        h('div', { style: { display: 'flex', gap: '10px', flexWrap: 'wrap' } },
+          outcomeChips(lb.passed, lb.counts)),
+        lastNote
       );
     }
 
@@ -191,7 +224,7 @@
     ]), 'Fixed for every cell in the grid; the only hardware axis is node count.');
 
     return h('div', { style: { marginBottom: '22px' } }, [
-      h('h3', { text: 'Why builds are red', style: { margin: '0 0 10px', fontSize: '15px' } }),
+      h('h3', { text: 'Summary', style: { margin: '0 0 10px', fontSize: '15px' } }),
       h('div', {
         style: {
           display: 'grid',
@@ -199,11 +232,7 @@
           gap: '12px', alignItems: 'start',
         },
       }, [
-        column(
-          'Overall failures',
-          h('div', { style: { display: 'flex', gap: '10px', flexWrap: 'wrap' } }, classChips(fc)),
-          overallNote
-        ),
+        overallCol,
         lastCol,
         hwCol,
       ]),
