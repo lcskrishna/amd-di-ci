@@ -15,6 +15,10 @@
   var SRC = 'data/vllm/di/grid.json';
   var STRIP = 12;
 
+  // Mirrors TERMINAL_VERDICTS in build_di_grid.py. A queued or running step is
+  // not evidence about a build and must not be counted as a failure.
+  var TERMINAL = new Set(['passed', 'failed', 'soft_failed', 'timed_out', 'broken']);
+
   // The driver's failure_class, in escalating order of "this is a real bug".
   var CLASS_LABEL = {
     infra: 'Infra',
@@ -80,44 +84,129 @@
     return h('div', { style: { marginBottom: '18px' } }, bits);
   }
 
-  // The reason this dashboard exists: Buildkite says "14 failed", but most of
-  // those never ran a test. Lead with that split.
-  function failureClasses(g) {
-    var fc = g.failure_classes || {};
-    var keys = Object.keys(fc);
-    if (!keys.length) return null;
-
-    var total = 0;
-    keys.forEach(function (k) { total += fc[k]; });
-
-    var onlyUnknown = keys.length === 1 && keys[0] === 'unknown';
-    var chips = ['workload', 'bringup', 'infra', 'unknown'].filter(function (k) {
-      return fc[k];
+  function classChips(counts) {
+    return ['workload', 'bringup', 'infra', 'unknown'].filter(function (k) {
+      return counts[k];
     }).map(function (k) {
       var c = classColor(k);
       return h('div', {
         title: CLASS_HELP[k] || '',
         style: {
           border: '1px solid ' + mix(c, 40), background: mix(c, 10), borderRadius: '6px',
-          padding: '10px 14px', minWidth: '110px',
+          padding: '10px 14px', minWidth: '96px',
         },
       }, [
-        h('div', { text: String(fc[k]), style: { fontSize: '22px', fontWeight: '700', color: c } }),
+        h('div', { text: String(counts[k]), style: { fontSize: '22px', fontWeight: '700', color: c } }),
         h('div', { text: CLASS_LABEL[k] || k, style: { fontSize: '12px', color: 'var(--text-muted)' } }),
       ]);
     });
+  }
 
-    var note = onlyUnknown
+  function column(title, body, note) {
+    return h('div', {
+      style: {
+        border: '1px solid var(--border)', borderRadius: '8px', padding: '12px 14px',
+        minWidth: '0',
+      },
+    }, [
+      h('div', {
+        text: title,
+        style: {
+          fontSize: '12px', fontWeight: '700', color: 'var(--text-muted)',
+          textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '10px',
+        },
+      }),
+      body,
+      note ? h('div', {
+        text: note,
+        style: { color: 'var(--text-muted)', fontSize: '11px', marginTop: '10px', lineHeight: '1.45' },
+      }) : null,
+    ].filter(Boolean));
+  }
+
+  // Counts for one build only. The aggregate answers "is this pipeline
+  // healthy"; this answers "should I look at the run that just went red",
+  // which is a different question and usually the urgent one.
+  function lastBuildClasses(g) {
+    var last = (g.build_rollup || [])[0];
+    if (!last) return null;
+    var counts = {};
+    Object.keys(last.models).forEach(function (m) {
+      last.models[m].runs.forEach(function (r) {
+        if (r.verdict === 'passed' || !TERMINAL.has(r.verdict)) return;
+        var k = r.failure_class || 'unknown';
+        counts[k] = (counts[k] || 0) + 1;
+      });
+    });
+    return { build_number: last.build_number, counts: counts };
+  }
+
+  // The reason this dashboard exists: Buildkite says "14 failed", but most of
+  // those never ran a test. Lead with that split.
+  function failureClasses(g) {
+    var fc = g.failure_classes || {};
+    if (!Object.keys(fc).length) return null;
+
+    var onlyUnknown = Object.keys(fc).length === 1 && fc.unknown;
+    var overallNote = onlyUnknown
       ? 'No SLURM verdicts yet — this pass ran with --no-logs. Re-run the collector with logs to split infra from real regressions.'
-      : 'Failure attribution from the SLURM driver’s own verdict line, which Buildkite’s red/green discards.';
+      : 'Every completed step across all collected builds, attributed from the SLURM driver’s own verdict line — which Buildkite’s red/green discards.';
+
+    var lastCol;
+    var lb = lastBuildClasses(g);
+    if (!lb) {
+      lastCol = column('Last build', h('div', {
+        text: 'No builds collected.',
+        style: { color: 'var(--text-muted)', fontSize: '13px' },
+      }));
+    } else if (!Object.keys(lb.counts).length) {
+      lastCol = column('Why build #' + lb.build_number + ' failed', h('div', {
+        text: 'Nothing failed — every completed step passed.',
+        style: { color: 'var(--accent-green)', fontSize: '13px', fontWeight: '600' },
+      }));
+    } else {
+      lastCol = column(
+        'Why build #' + lb.build_number + ' failed',
+        h('div', { style: { display: 'flex', gap: '10px', flexWrap: 'wrap' } }, classChips(lb.counts)),
+        'Failed steps in the most recent build only.'
+      );
+    }
+
+    var hwRow = function (label, value) {
+      return h('div', {
+        style: { display: 'flex', gap: '10px', fontSize: '13px', padding: '2px 0' },
+      }, [
+        h('span', { text: label, style: { color: 'var(--text-muted)', minWidth: '74px' } }),
+        h('span', { text: value, style: { fontWeight: '600' } }),
+      ]);
+    };
+
+    var hwCol = column('Hardware', h('div', {}, [
+      hwRow('Accelerator', 'AMD MI355X'),
+      hwRow('Fabric', 'AINIC'),
+      hwRow('Queue', 'amd_mi350_ainic'),
+      hwRow('Topology', '1P1D = 2 nodes · 2P2D = 4 nodes'),
+      hwRow('Parallelism', (g.axes || {}).mode || 'TP8'),
+      hwRow('KV transport', (g.axes || {}).transport || 'MoRIIO'),
+    ]), 'Fixed for every cell in the grid; the only hardware axis is node count.');
 
     return h('div', { style: { marginBottom: '22px' } }, [
-      h('h3', { text: 'Why builds are red', style: { margin: '0 0 8px', fontSize: '15px' } }),
-      h('div', { style: { display: 'flex', gap: '10px', flexWrap: 'wrap' } }, chips),
+      h('h3', { text: 'Why builds are red', style: { margin: '0 0 10px', fontSize: '15px' } }),
       h('div', {
-        text: note,
-        style: { color: 'var(--text-muted)', fontSize: '12px', marginTop: '8px' },
-      }),
+        style: {
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+          gap: '12px', alignItems: 'start',
+        },
+      }, [
+        column(
+          'Overall failures',
+          h('div', { style: { display: 'flex', gap: '10px', flexWrap: 'wrap' } }, classChips(fc)),
+          overallNote
+        ),
+        lastCol,
+        hwCol,
+      ]),
     ]);
   }
 
@@ -276,15 +365,13 @@
         title: tip,
         style: {
           display: 'block', width: '9px', height: '16px', borderRadius: '2px',
-          // Pale fill with a stronger edge of the same hue: legible as a block
-          // of colour without 12 saturated squares per cell dominating the page.
-          background: mix(verdictColor(e.verdict), 30),
-          border: '1px solid ' + mix(verdictColor(e.verdict), 55),
+          // Everything stays in the verdict's own hue — no neutral dark edge.
+          // A genuine test failure (the rare, important case) is picked out by
+          // a denser fill rather than by an outline in the text colour.
+          background: mix(verdictColor(e.verdict), e.failure_class === 'workload' ? 62 : 26),
+          border: '1px solid ' + mix(verdictColor(e.verdict), 38),
           boxSizing: 'border-box',
           textDecoration: 'none',
-          // A genuine test failure is the rare, important case, so it keeps a
-          // hard outline rather than relying on the tint alone.
-          outline: e.failure_class === 'workload' ? '1px solid var(--text)' : 'none',
         },
       });
       return box;
