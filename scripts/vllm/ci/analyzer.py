@@ -1066,6 +1066,22 @@ _UPSTREAM_HW_RE = re.compile(
 )
 
 
+_DEFAULT_HARDWARE = "h100"
+
+
+def set_default_hardware(hw: str):
+    """Set the hardware reported for job names that carry no hardware tag.
+
+    Defaults to ``h100`` because an untagged name in the upstream vLLM
+    pipeline means the default NVIDIA queue. A single-hardware pipeline whose
+    labels carry no tag (the AMD distributed-inference pipeline, entirely on
+    ``amd_mi350_ainic``) sets this at startup so its jobs are not all reported
+    as H100. Process-scoped, like ``set_shard_bases``.
+    """
+    global _DEFAULT_HARDWARE
+    _DEFAULT_HARDWARE = (hw or "h100").lower()
+
+
 def _extract_hardware(job_name: str) -> str:
     """Extract hardware family from job name.
 
@@ -1097,7 +1113,7 @@ def _extract_hardware(job_name: str) -> str:
     if lower.startswith("amd:"):
         return "unknown"
     # Default upstream GPU queue is H100
-    return "h100"
+    return _DEFAULT_HARDWARE
 
 
 def _actual_count(r: TestResult) -> int:

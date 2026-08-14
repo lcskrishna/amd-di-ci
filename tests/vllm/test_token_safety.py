@@ -81,10 +81,39 @@ class TestBuildkiteTokenScope:
                 f"Unknown pipeline slug '{slug}' in collect_analytics.py"
             )
 
+    def test_di_pipelines_py_only_vllm_org(self):
+        """scripts/vllm/di_pipelines.py must set BK_ORG = 'vllm'."""
+        path = SCRIPTS / "vllm" / "di_pipelines.py"
+        text = path.read_text()
+        m = re.search(r'BK_ORG\s*=\s*["\']([^"\']+)["\']', text)
+        assert m, "di_pipelines.py must define BK_ORG"
+        assert m.group(1) == "vllm", (
+            f"BK_ORG must be 'vllm', got '{m.group(1)}'. "
+            "Changing this would use the Buildkite token on a different org!"
+        )
+
+    def test_di_pipelines_py_only_known_slugs(self):
+        """The DI collector may only reach its own pipeline.
+
+        Mirrors ``test_pipelines_py_only_known_slugs``. The allowlist is the
+        point: a second pipeline registry must not become an unguarded path
+        for the shared token to reach an arbitrary slug.
+        """
+        path = SCRIPTS / "vllm" / "di_pipelines.py"
+        text = path.read_text()
+        slugs = re.findall(r'"slug"\s*:\s*"([^"]+)"', text)
+        allowed_slugs = {"amd-distributed-inference-ci"}
+        assert slugs, "di_pipelines.py must define at least one pipeline slug"
+        for slug in slugs:
+            assert slug in allowed_slugs, (
+                f"Unknown pipeline slug '{slug}' in di_pipelines.py. "
+                f"Only {allowed_slugs} are authorized."
+            )
+
     def test_no_buildkite_token_in_non_vllm_scripts(self):
-        """Only scripts/vllm/ and collect_ci.py should reference BUILDKITE_TOKEN."""
-        # collect_ci.py is at root but imports from vllm.pipelines — it's vLLM-specific
-        allowed_root_scripts = {"collect_ci.py"}
+        """Only scripts/vllm/ and the collect_*.py entry points may reference it."""
+        # Both are at root but import from vllm.* — they are vLLM-specific.
+        allowed_root_scripts = {"collect_ci.py", "collect_di_ci.py"}
         for py_file in SCRIPTS.rglob("*.py"):
             rel = py_file.relative_to(SCRIPTS)
             if str(rel).startswith("vllm") or rel.name in allowed_root_scripts:

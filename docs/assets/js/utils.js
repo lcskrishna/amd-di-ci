@@ -163,6 +163,13 @@ var DashboardTabs = (function() {
     { id: 'ci-hotness', label: 'CI Workload Trajectory', section: 'vLLM', family: 'ci' },
     { id: 'ci-omni', label: 'Omni CI', section: 'vLLM', family: 'ci' },
     {
+      id: 'ci-di',
+      label: 'DI Grid',
+      section: 'vLLM',
+      family: 'ci',
+      description: 'AMD disaggregated prefill/decode matrix from the amd-distributed-inference-ci pipeline',
+    },
+    {
       id: 'ci-testbuild',
       label: 'Test Build',
       section: 'vLLM',

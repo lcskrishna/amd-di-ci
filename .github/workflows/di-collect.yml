@@ -1,0 +1,73 @@
+name: DI Data Collection
+
+# Collects the AMD distributed-inference pipeline
+# (buildkite.com/vllm/amd-distributed-inference-ci) into data/vllm/di/.
+#
+# Manual dispatch only for now. The schedule below is deliberately left
+# commented until a run has been eyeballed against the Buildkite UI — these
+# are 120-minute jobs on a scarce MI350 allocation, so there is nothing to
+# gain from polling before the data is trusted.
+on:
+  workflow_dispatch:
+    inputs:
+      days:
+        description: 'Days of history to fetch'
+        required: false
+        default: '30'
+      no_logs:
+        description: 'Skip job logs (loses the SLURM phase/reason verdict)'
+        type: boolean
+        required: false
+        default: false
+  # schedule:
+  #   - cron: '17 */3 * * *'
+
+concurrency:
+  group: di-collect
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install requests pyyaml
+
+      - name: Collect DI data
+        run: |
+          ARGS="--days ${{ github.event.inputs.days || '30' }}"
+          if [ "${{ github.event.inputs.no_logs }}" = "true" ]; then
+            ARGS="$ARGS --no-logs"
+          fi
+          python scripts/collect_di_ci.py $ARGS --output data/vllm/di/
+        env:
+          BUILDKITE_TOKEN: ${{ secrets.BUILDKITE_TOKEN }}
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # data/vllm/di/ only. Upstream commits data/vllm/ci/ every ~90
+          # minutes; keeping the two paths disjoint is what makes rebasing
+          # onto upstream/main stay trivial.
+          git add data/vllm/di/
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "di: update distributed-inference CI data $(date -u +%Y-%m-%d)"
+            if git pull --rebase origin "${GITHUB_REF_NAME}"; then
+              git push || echo "::warning::Push failed (branch protection?)."
+            else
+              git rebase --abort || true
+              echo "::warning::Rebase failed; no data was published."
+            fi
+          fi
