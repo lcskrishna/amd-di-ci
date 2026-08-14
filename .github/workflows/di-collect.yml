@@ -1,12 +1,16 @@
-name: DI Data Collection
+name: DI Collect and Publish
 
 # Collects the AMD distributed-inference pipeline
-# (buildkite.com/vllm/amd-distributed-inference-ci) into data/vllm/di/.
+# (buildkite.com/vllm/amd-distributed-inference-ci) into data/vllm/di/, then
+# publishes the standalone grid to Pages.
 #
-# Manual dispatch only for now. The schedule below is deliberately left
-# commented until a run has been eyeballed against the Buildkite UI — these
-# are 120-minute jobs on a scarce MI350 allocation, so there is nothing to
-# gain from polling before the data is trusted.
+# Collection and publication are one job on purpose: split across two
+# workflows the page can serve data the repo no longer has, and the failure
+# mode is silent.
+#
+# Every three hours is already generous — the steps are 120-minute jobs on a
+# scarce MI350 allocation, so the pipeline produces at most a handful of
+# builds a day.
 on:
   workflow_dispatch:
     inputs:
@@ -19,8 +23,8 @@ on:
         type: boolean
         required: false
         default: false
-  # schedule:
-  #   - cron: '17 */3 * * *'
+  schedule:
+    - cron: '23 */3 * * *'
 
 concurrency:
   group: di-collect
@@ -71,3 +75,18 @@ jobs:
               echo "::warning::Rebase failed; no data was published."
             fi
           fi
+
+      # Runs even when the commit was a no-op: a change to the renderer with no
+      # new builds still needs to reach the site.
+      - name: Build DI site
+        run: python scripts/build_di_site.py --output _site_di
+
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_site_di
+          publish_branch: gh-pages
+          # force_orphan keeps gh-pages a single commit rather than accruing
+          # one per three-hour run forever.
+          keep_files: false
+          force_orphan: true

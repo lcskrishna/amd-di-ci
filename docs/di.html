@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AMD Distributed Inference CI</title>
+
+  <!--
+    Standalone page for the DI grid alone.
+
+    index.html is the full operations dashboard and needs the whole
+    data/vllm/ci/** corpus. This page needs exactly one file, grid.json, so it
+    can be published on its own from a workflow that holds only a Buildkite
+    token. ci-di.js is reused unmodified: it renders into #ci-di-view inside an
+    active #tab-ci-di, which the markup below provides directly instead of
+    having registerCISection() build it.
+
+    connect-src is narrower than index.html's on purpose — this page makes no
+    authenticated API calls, so it needs no token-bearing origin at all.
+  -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+
+  <link rel="stylesheet" href="assets/css/dashboard.css?v=1">
+  <style>
+    /* No sidebar on this page, so reclaim the gutter it would occupy. */
+    #main-content { margin-left: 0; }
+  </style>
+  <script>
+    (function () {
+      var saved = localStorage.getItem('theme');
+      var theme = saved || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+</head>
+<body>
+  <button id="theme-toggle" title="Toggle light/dark mode" aria-label="Toggle theme"></button>
+
+  <div id="main-content">
+    <div id="tab-ci-di" class="tab-panel active">
+      <section id="ci-di-view"></section>
+    </div>
+  </div>
+
+  <script src="assets/js/utils.js?v=1"></script>
+  <script src="assets/js/ci-di.js?v=1"></script>
+  <script>
+    (function () {
+      var btn = document.getElementById('theme-toggle');
+      function updateIcon() {
+        btn.textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+      }
+      updateIcon();
+      btn.onclick = function () {
+        var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('theme', next);
+        location.reload();
+      };
+    })();
+  </script>
+</body>
+</html>
