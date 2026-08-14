@@ -198,7 +198,7 @@
         + (lb.pending ? ' — ' + lb.pending + ' step' + (lb.pending === 1 ? '' : 's')
             + ' still running, not counted either way.' : '.');
       lastCol = column(
-        'Build #' + lb.build_number + ' — ' + lb.passed + '/' + lb.completed + ' passed',
+        'Latest build #' + lb.build_number + ' — ' + lb.passed + '/' + lb.completed + ' passed',
         h('div', { style: { display: 'flex', gap: '10px', flexWrap: 'wrap' } },
           outcomeChips(lb.passed, lb.counts)),
         lastNote
