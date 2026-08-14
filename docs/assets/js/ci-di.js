@@ -46,6 +46,13 @@
     return 'var(--text-muted)';
   }
 
+  // Tint a colour toward transparent. The colours above are CSS variables, so
+  // the usual trick of appending an alpha suffix ("#ff000066") cannot work —
+  // "var(--x)66" is not a colour and the declaration is dropped silently.
+  function mix(c, percent) {
+    return 'color-mix(in srgb, ' + c + ' ' + percent + '%, transparent)';
+  }
+
   function mins(s) {
     if (s == null) return '--';
     return (s / 60).toFixed(1) + 'm';
@@ -91,7 +98,7 @@
       return h('div', {
         title: CLASS_HELP[k] || '',
         style: {
-          border: '1px solid ' + c + '66', background: c + '1a', borderRadius: '6px',
+          border: '1px solid ' + mix(c, 40), background: mix(c, 10), borderRadius: '6px',
           padding: '10px 14px', minWidth: '110px',
         },
       }, [
@@ -155,7 +162,7 @@
             title: r.reason || '',
             style: {
               fontSize: '11px', color: classColor(tag),
-              border: '1px solid ' + classColor(tag) + '66', borderRadius: '3px', padding: '0 5px',
+              border: '1px solid ' + mix(classColor(tag), 40), borderRadius: '3px', padding: '0 5px',
             },
           }) : null,
         ].filter(Boolean));
@@ -269,7 +276,14 @@
         title: tip,
         style: {
           display: 'block', width: '9px', height: '16px', borderRadius: '2px',
-          background: verdictColor(e.verdict), textDecoration: 'none',
+          // Pale fill with a stronger edge of the same hue: legible as a block
+          // of colour without 12 saturated squares per cell dominating the page.
+          background: mix(verdictColor(e.verdict), 30),
+          border: '1px solid ' + mix(verdictColor(e.verdict), 55),
+          boxSizing: 'border-box',
+          textDecoration: 'none',
+          // A genuine test failure is the rare, important case, so it keeps a
+          // hard outline rather than relying on the tint alone.
           outline: e.failure_class === 'workload' ? '1px solid var(--text)' : 'none',
         },
       });
@@ -316,7 +330,8 @@
     return h('td', {
       style: {
         padding: '8px', verticalAlign: 'top',
-        borderLeft: '3px solid ' + verdictColor(cell.last_verdict),
+        background: mix(verdictColor(cell.last_verdict), 8),
+        borderLeft: '3px solid ' + mix(verdictColor(cell.last_verdict), 55),
       },
     }, [
       h('div', { text: rateTxt, style: { fontSize: '13px', fontWeight: '600', color: rateColor } }),
