@@ -25,6 +25,19 @@ on:
         default: false
   schedule:
     - cron: '23 */3 * * *'
+  # Renderer changes must reach the site without waiting for the next tick.
+  # The paths filter is also the loop guard: this job pushes its own commits
+  # to this branch, but those only ever touch data/vllm/di/, which is not
+  # listed here, so a collection run cannot retrigger itself.
+  push:
+    branches: [di]
+    paths:
+      - 'docs/di.html'
+      - 'docs/assets/js/ci-di.js'
+      - 'docs/assets/css/dashboard.css'
+      - 'docs/assets/js/utils.js'
+      - 'scripts/build_di_site.py'
+      - '.github/workflows/di-collect.yml'
 
 concurrency:
   group: di-collect

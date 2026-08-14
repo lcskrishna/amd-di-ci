@@ -59,8 +59,12 @@
 
   function header(g) {
     var last = (g.builds && g.builds[0]) || null;
-    var bits = [h('h2', { text: 'AMD Distributed Inference', style: { margin: '0 0 4px' } })];
-    var sub = g.pipeline ? g.pipeline : 'amd-distributed-inference-ci';
+    var p = g.pipeline || {};
+    var bits = [h('h2', {
+      text: p.display_name || 'AMD Distributed Inference',
+      style: { margin: '0 0 4px' },
+    })];
+    var sub = p.slug || 'amd-distributed-inference-ci';
     if (last) {
       sub += '  ·  latest build #' + last.build_number + ' (' + last.state + ')';
     }
