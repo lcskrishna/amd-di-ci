@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-19T07:11:52Z",
+  "generated_at": "2026-08-19T09:54:48Z",
   "pipeline": {
     "slug": "amd-distributed-inference-ci",
     "name_pattern": ".*",
@@ -32,7 +32,7 @@
     {
       "build_number": 44,
       "build_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/44",
-      "state": "failed",
+      "state": "failing",
       "branch": "vllm-project:vllm",
       "commit": "529d01035114",
       "created_at": "2026-08-18T19:00:01.785Z"
@@ -412,6 +412,17 @@
               "failure_class": "workload",
               "slurm_state": "workload-failed",
               "reason": "scontrol JobState=FAILED phase=workload"
+            },
+            {
+              "shape": "2P2D",
+              "router": "vllm-router",
+              "mode": "TP8",
+              "verdict": "running",
+              "runtime_s": null,
+              "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/44#01a01966-8ad4-4aba-8933-bbbf980e38d7",
+              "failure_class": "",
+              "slurm_state": "",
+              "reason": ""
             }
           ]
         },
@@ -8629,6 +8640,20 @@
         {
           "build_number": 44,
           "date": "2026-08-18",
+          "verdict": "running",
+          "state": "running",
+          "runtime_s": null,
+          "queue_wait_s": 0.4,
+          "agent_name": "spur-login-atl-5",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/44#01a01966-8ad4-4aba-8933-bbbf980e38d7",
+          "phase": "",
+          "slurm_state": "",
+          "failure_class": "",
+          "reason": ""
+        },
+        {
+          "build_number": 44,
+          "date": "2026-08-18",
           "verdict": "failed",
           "state": "failed",
           "runtime_s": 3896.7,
@@ -8751,30 +8776,16 @@
           "slurm_state": "bringup-timeout",
           "failure_class": "bringup",
           "reason": "no healthy within 4500s"
-        },
-        {
-          "build_number": 35,
-          "date": "2026-08-11",
-          "verdict": "failed",
-          "state": "failed",
-          "runtime_s": 2289.1,
-          "queue_wait_s": 0.6,
-          "agent_name": "spur-login-atl-4",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/35#019ff100-2134-4b79-a096-9e41e9744a4e",
-          "phase": "workload",
-          "slurm_state": "workload-timeout",
-          "failure_class": "workload",
-          "reason": "no verdict within 1800s"
         }
       ],
-      "attempts": 29,
+      "attempts": 30,
       "completed": 26,
       "passed": 8,
       "failed": 18,
       "pass_rate": 0.3077,
       "rate_is_reportable": true,
       "flips": 11,
-      "last_verdict": "failed",
+      "last_verdict": "running",
       "median_runtime_s": 2366.1,
       "median_queue_wait_s": 0.6
     },
