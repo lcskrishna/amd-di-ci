@@ -74,11 +74,17 @@ TRANSPORT = "MoRIIO"
 # Both grids carry the full shape x router column set even though wide-EP only
 # runs 1P1D today. The empty 2P2D half *is* the coverage gap; a narrower table
 # would hide it.
+#
+# ``mode`` is the label token and the cell key; ``mode_label`` is the shorter
+# form the column headers carry. Declared rather than derived from ``mode``,
+# because trimming "-WideEP" off the end is the kind of rule that quietly
+# mangles the next mode someone adds.
 GRIDS = (
     {
         "key": "tp8",
-        "title": "Tensor parallel — TP8",
+        "title": "PD Disagg with TP8",
         "mode": "TP8",
+        "mode_label": "TP8",
         "shapes": SHAPES,
         "routers": ROUTERS,
         "note": "The original matrix. 1P1D = 2 nodes, 2P2D = 4 nodes.",
@@ -87,6 +93,7 @@ GRIDS = (
         "key": "wide-ep",
         "title": "Wide expert parallel — EP8/DP8",
         "mode": "EP8/DP8-WideEP",
+        "mode_label": "EP8/DP8",
         "shapes": SHAPES,
         "routers": ROUTERS,
         "note": "Commented out in pipeline-disagg.yaml until build 47 "

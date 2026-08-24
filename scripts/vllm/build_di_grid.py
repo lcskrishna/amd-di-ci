@@ -272,6 +272,7 @@ def build_grid(records: list[dict]) -> dict:
                     "key": g["key"],
                     "title": g["title"],
                     "mode": g["mode"],
+                    "mode_label": g["mode_label"],
                     "shapes": list(g["shapes"]),
                     "routers": list(g["routers"]),
                     "note": g["note"],

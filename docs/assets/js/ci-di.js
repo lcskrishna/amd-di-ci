@@ -485,8 +485,11 @@
       return h('th', { text: t, style: st });
     };
 
+    // Shape, router and mode all in the header: the two grids are stacked, so a
+    // column read out of context has to say which parallelism it belongs to.
+    var modeLabel = def.mode_label || def.mode;
     var head = h('tr', {}, [th('Model')].concat(cols.map(function (c) {
-      return th(c.shape + ' · ' + c.router);
+      return th(c.shape + '.' + c.router + '.' + modeLabel);
     })));
 
     var rows = models.map(function (m) {
