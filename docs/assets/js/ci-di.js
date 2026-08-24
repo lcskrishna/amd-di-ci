@@ -708,7 +708,11 @@
     host.innerHTML = '';
     host.append(h('div', { text: 'Loading DI grid...', style: { color: 'var(--text-muted)' } }));
 
-    var g = await fetchJSON(SRC, { timeoutMs: 10000 });
+    // forceRefresh, because only the HTML's asset URLs get a ?v= cache-bust at
+    // build time — grid.json is fetched from a fixed path and Pages serves it
+    // with max-age=600, so without revalidation a fresh script renders data up
+    // to ten minutes old, including its axes.
+    var g = await fetchJSON(SRC, { timeoutMs: 10000, forceRefresh: true });
     host.innerHTML = '';
 
     if (!g) {
