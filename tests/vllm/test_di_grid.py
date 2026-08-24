@@ -1,5 +1,7 @@
 """DI grid assembly tests."""
 
+from collections import Counter
+
 from vllm.build_di_grid import MIN_SAMPLES_FOR_RATE, build_grid, expected_cells
 from vllm.di_collect import job_record
 from vllm.di_labels import parse_label
@@ -15,6 +17,10 @@ BUILD = {
 
 LABEL = "DeepSeek-V3-PD-1P1D-TP8-MoRIIO-proxy"
 CELL_ID = parse_label(LABEL).cell_id
+
+# Same model, shape and router as LABEL — only the mode differs.
+WIDE_EP_LABEL = "DeepSeek-V3-PD-1P1D-EP8/DP8-WideEP-MoRIIO-proxy"
+WIDE_EP_CELL_ID = parse_label(WIDE_EP_LABEL).cell_id
 
 
 def record(build_number, state="passed", label=LABEL, **overrides):
@@ -43,17 +49,31 @@ def cell_by_id(grid, cell_id):
 # Shape of the grid
 # ---------------------------------------------------------------------------
 
-def test_grid_enumerates_twenty_live_cells_plus_the_disabled_wide_ep_cell():
+def test_every_grid_is_enumerated_in_full():
     cells = expected_cells()
-    assert sum(1 for c in cells if c["enabled"]) == 20
-    assert sum(1 for c in cells if not c["enabled"]) == 1
+    assert Counter(c["grid"] for c in cells) == {"tp8": 20, "wide-ep": 20}
 
 
 def test_cells_that_never_ran_are_rendered_not_omitted():
     grid = build_grid([])
-    assert len(grid["cells"]) == 21
-    assert all(c["last_verdict"] in ("never_run", "disabled") for c in grid["cells"])
+    assert len(grid["cells"]) == 40
+    assert all(c["last_verdict"] == "never_run" for c in grid["cells"])
     assert cell_by_id(grid, CELL_ID)["pass_rate"] is None
+
+
+def test_tp8_and_wide_ep_cells_do_not_collide():
+    # These two differ in mode alone. Any structure keyed on
+    # (model, shape, router) folds them into one, which is the bug this
+    # whole split exists to prevent.
+    grid = build_grid([
+        record(1, label=LABEL),
+        record(1, state="failed", label=WIDE_EP_LABEL),
+    ])
+    tp8 = cell_by_id(grid, CELL_ID)
+    wide = cell_by_id(grid, WIDE_EP_CELL_ID)
+    assert (tp8["grid"], wide["grid"]) == ("tp8", "wide-ep")
+    assert (tp8["last_verdict"], wide["last_verdict"]) == ("passed", "failed")
+    assert not [c for c in grid["cells"] if c.get("unexpected")]
 
 
 def test_a_renamed_step_surfaces_as_an_extra_cell():
@@ -63,6 +83,22 @@ def test_a_renamed_step_surfaces_as_an_extra_cell():
     extra = [c for c in grid["cells"] if c.get("unexpected")]
     assert len(extra) == 1
     assert extra[0]["model"] == "DeepSeek-V9"
+
+
+def test_a_step_dead_for_several_builds_is_retired_not_unexpected():
+    # The real case: router "toy proxy" ran until build 15 and never again. A
+    # step renamed today and one dead for months want opposite volumes on the
+    # page, so the same detection has to sort them by recency.
+    gone = "DeepSeek-V3-PD-1P1D-TP8-MoRIIO-toy proxy"
+    grid = build_grid([record(1, label=gone)] + [record(n) for n in (2, 3, 4)])
+    retired = [c for c in grid["cells"] if c.get("retired")]
+    assert [c["router"] for c in retired] == ["toy proxy"]
+    assert not [c for c in grid["cells"] if c.get("unexpected")]
+
+    # Still running in the newest build: an alert, not history.
+    grid = build_grid([record(n, label=gone) for n in (1, 4)] + [record(n) for n in (2, 3)])
+    assert [c["router"] for c in grid["cells"] if c.get("unexpected")] == ["toy proxy"]
+    assert not [c for c in grid["cells"] if c.get("retired")]
 
 
 def test_unparseable_labels_go_to_a_visible_bucket():

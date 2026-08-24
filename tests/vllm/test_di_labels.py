@@ -52,7 +52,7 @@ def test_dotted_model_name():
 
 def test_wide_ep_label_is_not_unclassified():
     cell = parse_label(WIDE_EP_LABEL)
-    assert cell.ok, "the disabled wide-EP cell is the one we most want to watch"
+    assert cell.ok, "wide-EP went live at build 47; its labels must parse"
     assert cell.model == "DeepSeek-V3"
     assert cell.shape == "1P1D"
     assert cell.wide_ep

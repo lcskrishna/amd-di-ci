@@ -36,7 +36,7 @@ DI_QUEUE = "amd_mi350_ainic"
 DI_HARDWARE = "mi350"
 
 # Non-test infrastructure steps, matched as substrings of lowercased labels.
-# None of the current 20 DI labels contain any of these.
+# None of the current 30 DI labels contain any of these.
 SKIP_JOB_PATTERNS = (
     "bootstrap",
     ":docker:",
@@ -65,9 +65,31 @@ SHAPES = ("1P1D", "2P2D")
 ROUTERS = ("proxy", "vllm-router")
 TRANSPORT = "MoRIIO"
 
-# Steps present in pipeline-disagg.yaml but commented out. Rendered as an
-# explicit "disabled" cell so that enabling them is visible rather than
-# silent — wide-EP going green is the outcome this dashboard exists to watch.
-DISABLED_LABELS = (
-    "DeepSeek-V3-PD-1P1D-EP8/DP8-WideEP-MoRIIO-proxy",
+# One grid per parallelism mode, rendered top to bottom in this order.
+#
+# Mode is a grid selector, not a global constant: a wide-EP cell shares model,
+# shape and router with a TP8 cell and differs only by mode, so a single matrix
+# keyed on (model, shape, router) silently collapses the two into one.
+#
+# Both grids carry the full shape x router column set even though wide-EP only
+# runs 1P1D today. The empty 2P2D half *is* the coverage gap; a narrower table
+# would hide it.
+GRIDS = (
+    {
+        "key": "tp8",
+        "title": "Tensor parallel — TP8",
+        "mode": "TP8",
+        "shapes": SHAPES,
+        "routers": ROUTERS,
+        "note": "The original matrix. 1P1D = 2 nodes, 2P2D = 4 nodes.",
+    },
+    {
+        "key": "wide-ep",
+        "title": "Wide expert parallel — EP8/DP8",
+        "mode": "EP8/DP8-WideEP",
+        "shapes": SHAPES,
+        "routers": ROUTERS,
+        "note": "Commented out in pipeline-disagg.yaml until build 47 "
+                "(2026-08-21). Only 1P1D is defined upstream so far.",
+    },
 )

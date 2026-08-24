@@ -1,7 +1,8 @@
 // AMD distributed-inference (DI) grid view.
 //
-// Renders data/vllm/di/grid.json: the 20-cell model x shape x router matrix
-// from buildkite.com/vllm/amd-distributed-inference-ci.
+// Renders data/vllm/di/grid.json: one model x shape x router matrix per
+// parallelism mode (TP8 and wide-EP today), from
+// buildkite.com/vllm/amd-distributed-inference-ci.
 //
 // Deliberately standalone rather than a branch inside ops-v2.js. ops-v2 owns
 // its tabs via OWNED_TABS and returns early for anything else, so observing
@@ -219,7 +220,9 @@
       hwRow('Fabric', 'AINIC'),
       hwRow('Queue', 'amd_mi350_ainic'),
       hwRow('Topology', '1P1D = 2 nodes · 2P2D = 4 nodes'),
-      hwRow('Parallelism', (g.axes || {}).mode || 'TP8'),
+      hwRow('Parallelism', ((g.axes || {}).grids || []).map(function (x) {
+        return x.mode;
+      }).join('  ·  ') || 'TP8'),
       hwRow('KV transport', (g.axes || {}).transport || 'MoRIIO'),
     ]), 'Fixed for every cell in the grid; the only hardware axis is node count.');
 
@@ -259,16 +262,19 @@
   function detailRow(row, models, span) {
     var blocks = models.filter(function (m) { return row.models[m]; }).map(function (m) {
       var d = row.models[m];
+      // Mode has to be in the sort key and on screen: from build 47 a model
+      // has both a TP8 and a wide-EP run at 1P1D proxy, and without it the two
+      // rows are indistinguishable.
       var runs = d.runs.slice().sort(function (a, b) {
-        return (a.shape + a.router).localeCompare(b.shape + b.router);
+        return (a.mode + a.shape + a.router).localeCompare(b.mode + b.shape + b.router);
       }).map(function (r) {
         var tag = r.failure_class && r.failure_class !== 'ok' ? r.failure_class : '';
         return h('div', {
           style: { display: 'flex', gap: '10px', alignItems: 'baseline', fontSize: '12px', padding: '2px 0' },
         }, [
           h('span', {
-            text: r.shape + ' ' + r.router,
-            style: { minWidth: '150px', color: 'var(--text-muted)' },
+            text: r.mode + '  ' + r.shape + ' ' + r.router,
+            style: { minWidth: '230px', color: 'var(--text-muted)' },
           }),
           h('a', {
             text: r.verdict, href: r.job_url || '#', target: '_blank', rel: 'noopener',
@@ -371,9 +377,10 @@
         h('tbody', {}, body),
       ]),
       h('div', {
-        text: 'passed/completed across each model’s four cells (1P1D+2P2D × proxy+vllm-router). '
-          + 'Click a build to expand every step, its runtime, and the SLURM failure class. '
-          + 'Denominators come from steps actually run, so early partial builds are not scored out of 20.',
+        text: 'passed/completed across every cell that ran in that build, all modes. '
+          + 'Click a build to expand each step, its runtime, and the SLURM failure class. '
+          + 'Denominators come from steps actually run, so a build from before wide-EP '
+          + 'landed is not scored against cells that did not exist yet.',
         style: { fontSize: '12px', color: 'var(--text-muted)', marginTop: '8px' },
       }),
     ]);
@@ -412,19 +419,6 @@
     if (!cell) {
       return h('td', { text: '--', style: { padding: '8px', color: 'var(--text-muted)' } });
     }
-    if (!cell.enabled) {
-      return h('td', { style: { padding: '8px', verticalAlign: 'top' } }, [
-        h('div', {
-          text: 'disabled',
-          title: 'Commented out in pipeline-disagg.yaml — the wide-EP block.',
-          style: {
-            fontSize: '12px', color: 'var(--text-muted)', fontStyle: 'italic',
-            border: '1px dashed var(--border)', borderRadius: '5px', padding: '10px', textAlign: 'center',
-          },
-        }),
-      ]);
-    }
-
     var rateTxt, rateColor;
     if (cell.pass_rate == null) {
       rateTxt = 'never run';
@@ -458,28 +452,27 @@
     ]);
   }
 
-  function gridTable(g) {
+  // One table per parallelism mode. mode MUST be part of the lookup key:
+  // DeepSeek-V3|1P1D|EP8/DP8-WideEP|MoRIIO|proxy differs from the TP8 cell in
+  // mode alone, and keying without it lets one silently overwrite the other.
+  function gridTables(g) {
     var axes = g.axes || {};
     var models = axes.models || [];
-    var shapes = axes.shapes || [];
-    var routers = axes.routers || [];
-    var mode = axes.mode || 'TP8';
-
-    // Index the enumerated cells so a missing combination renders blank
-    // rather than shifting every column after it.
-    //
-    // mode MUST be part of the key. The wide-EP cell is
-    // DeepSeek-V3|1P1D|EP8/DP8-WideEP|MoRIIO|proxy — identical to a live cell
-    // in model, shape and router, differing only in mode. Keying without it
-    // lets the disabled cell overwrite the live one.
     var byKey = {};
     (g.cells || []).forEach(function (c) {
       byKey[[c.model, c.shape, c.mode, c.router].join('|')] = c;
     });
+    return (axes.grids || []).map(function (def) {
+      return gridTable(def, models, byKey, g.min_samples_for_rate);
+    });
+  }
+
+  function gridTable(def, models, byKey, minSamples) {
+    var mode = def.mode;
 
     var cols = [];
-    shapes.forEach(function (s) {
-      routers.forEach(function (r) { cols.push({ shape: s, router: r }); });
+    (def.shapes || []).forEach(function (s) {
+      (def.routers || []).forEach(function (r) { cols.push({ shape: s, router: r }); });
     });
 
     var th = function (t, extra) {
@@ -509,23 +502,12 @@
       return h('tr', {}, [name].concat(cells));
     });
 
-    // Anything the enumeration did not predict: a renamed or retired step.
-    var extras = (g.cells || []).filter(function (c) { return c.unexpected; });
-    extras.forEach(function (c) {
-      var name = h('td', {
-        style: {
-          padding: '8px', fontSize: '13px', whiteSpace: 'nowrap',
-          borderTop: '1px solid var(--border)', color: 'var(--accent-orange)',
-        },
-      }, [h('span', { text: c.model + ' (unexpected)', title: c.cell_id })]);
-      var pad = cols.map(function (col, i) {
-        return i === 0 ? cellBox(c) : h('td', { text: '' });
-      });
-      rows.push(h('tr', {}, [name].concat(pad)));
-    });
-
     return h('div', { style: { marginBottom: '22px', overflowX: 'auto' } }, [
-      h('h3', { text: 'Grid', style: { margin: '0 0 8px', fontSize: '15px' } }),
+      h('h3', { text: def.title, style: { margin: '0 0 2px', fontSize: '15px' } }),
+      h('div', {
+        text: def.note || '',
+        style: { fontSize: '12px', color: 'var(--text-muted)', margin: '0 0 8px' },
+      }),
       h('table', { style: { width: '100%', borderCollapse: 'collapse', fontSize: '14px' } }, [
         h('thead', {}, [head]),
         h('tbody', {}, rows),
@@ -533,56 +515,67 @@
       h('div', {
         text: 'Each square is one build, oldest left. Outlined squares are genuine workload '
           + 'failures; click any square to open the Buildkite job. Rates are withheld below '
-          + (g.min_samples_for_rate || 5) + ' completed runs.',
+          + (minSamples || 5) + ' completed runs.',
         style: { fontSize: '12px', color: 'var(--text-muted)', marginTop: '8px' },
       }),
     ]);
   }
 
-  // Modes outside the main matrix — today just the commented-out wide-EP
-  // block. Rendered explicitly so its eventual enablement is visible rather
-  // than silent.
-  function offMatrix(g) {
-    var mode = (g.axes || {}).mode || 'TP8';
-    var others = (g.cells || []).filter(function (c) {
-      return c.mode && c.mode !== mode && !c.unexpected;
-    });
-    if (!others.length) return null;
+  function cellLine(c) {
+    return c.model + ' · ' + c.shape + ' · ' + c.mode + ' · ' + c.router
+      + '  —  ' + c.completed + ' run' + (c.completed === 1 ? '' : 's')
+      + (c.last_build ? ', last in #' + c.last_build : '');
+  }
 
-    var items = others.map(function (c) {
-      var live = c.enabled && c.attempts > 0;
-      var status = !c.enabled ? 'disabled in pipeline-disagg.yaml'
-        : (c.attempts ? c.completed + ' runs' : 'enabled, not yet run');
-      return h('div', {
-        style: {
-          border: '1px dashed var(--border)', borderRadius: '6px',
-          padding: '10px 14px', minWidth: '260px',
-        },
-      }, [
-        h('div', {
-          text: c.model + ' · ' + c.shape + ' · ' + c.router,
-          style: { fontSize: '13px', fontWeight: '600' },
-        }),
-        h('div', {
-          text: c.mode,
-          style: { fontSize: '12px', color: 'var(--accent)', fontFamily: 'monospace' },
-        }),
-        h('div', {
-          text: status,
-          style: { fontSize: '12px', color: live ? 'var(--text)' : 'var(--text-muted)', marginTop: '4px' },
-        }),
-        live ? strip(c) : null,
-      ].filter(Boolean));
-    });
-
-    return h('div', { style: { marginBottom: '22px' } }, [
-      h('h3', { text: 'Wide-EP watch', style: { margin: '0 0 8px', fontSize: '15px' } }),
-      h('div', { style: { display: 'flex', gap: '10px', flexWrap: 'wrap' } }, items),
+  // A step whose label still parses but is not in any enumerated grid: added
+  // or renamed upstream since this file was last updated. Loud, because the
+  // label format is effectively the schema.
+  function unexpectedPanel(g) {
+    var extras = (g.cells || []).filter(function (c) { return c.unexpected; });
+    if (!extras.length) return null;
+    return h('div', {
+      style: {
+        border: '1px solid var(--accent-orange)66', background: 'var(--accent-orange)14',
+        borderRadius: '6px', padding: '12px 14px', marginBottom: '22px',
+      },
+    }, [
       h('div', {
-        text: 'Kept out of the matrix above because it shares model, shape and router '
-          + 'with a live cell and differs only by mode.',
-        style: { fontSize: '12px', color: 'var(--text-muted)', marginTop: '8px' },
+        text: 'Steps outside the defined grids (' + extras.length + ')',
+        style: { fontWeight: '600', fontSize: '14px', marginBottom: '6px' },
       }),
+      h('ul', { style: { margin: '0', paddingLeft: '18px', color: 'var(--text-muted)' } },
+        extras.map(function (c) {
+          return h('li', {
+            text: cellLine(c), title: c.cell_id,
+            style: { fontSize: '13px', marginBottom: '3px' },
+          });
+        })),
+      h('div', {
+        text: 'Still running, but absent from GRIDS in di_pipelines.py — either add it '
+          + 'there or find out who renamed it.',
+        style: { fontSize: '12px', color: 'var(--text-muted)', marginTop: '6px' },
+      }),
+    ]);
+  }
+
+  // Same detection, opposite volume: these stopped running builds ago, so they
+  // are history rather than an alert. Kept visible so the data never silently
+  // disappears.
+  function retiredPanel(g) {
+    var gone = (g.cells || []).filter(function (c) { return c.retired; });
+    if (!gone.length) return null;
+    return h('details', { style: { marginBottom: '14px' } }, [
+      h('summary', {
+        text: 'Retired steps (' + gone.length + ')',
+        style: { cursor: 'pointer', fontSize: '14px', fontWeight: '600', color: 'var(--text-muted)' },
+      }),
+      h('ul', { style: { margin: '8px 0 0', paddingLeft: '18px', color: 'var(--text-muted)' } },
+        gone.map(function (c) {
+          return h('li', {
+            text: cellLine(c), title: c.cell_id,
+            style: { fontSize: '13px', marginBottom: '3px' },
+          });
+        })),
     ]);
   }
 
@@ -726,8 +719,10 @@
       return;
     }
 
-    var parts = [header(g), failureClasses(g), gridTable(g), offMatrix(g),
-                 buildModelTable(g), unclassified(g), agentsPanel(g), buildsPanel(g)];
+    var parts = [header(g), failureClasses(g)]
+      .concat(gridTables(g))
+      .concat([unexpectedPanel(g), buildModelTable(g), unclassified(g),
+               retiredPanel(g), agentsPanel(g), buildsPanel(g)]);
     parts.forEach(function (p) { if (p) host.append(p); });
   }
 

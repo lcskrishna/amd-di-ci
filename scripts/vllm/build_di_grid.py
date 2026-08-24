@@ -16,19 +16,16 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable, Optional
 
-from .di_labels import parse_label
 from .di_pipelines import (
-    DISABLED_LABELS,
     DI_PIPELINES,
     DI_KEY,
+    GRIDS,
     MODELS,
-    ROUTERS,
-    SHAPES,
     STEP_TIMEOUT_MINS,
     TRANSPORT,
 )
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 # Verdicts that represent a completed attempt. Everything else (waiting,
 # running, canceled, blocked) is excluded from pass rates: a step that never
@@ -45,9 +42,10 @@ MIN_SAMPLES_FOR_RATE = 5
 # Cap the per-cell outcome strip. Matches the analyzer's flaky window.
 HISTORY_LIMIT = 10
 
-# All 20 live steps run TP8; the parallelism descriptor only varies for the
-# disabled wide-EP step, which carries its own.
-DEFAULT_MODE = "TP8"
+# A cell absent from this many of the newest builds is retired rather than
+# newly renamed. Wide enough to tolerate one in-flight or partial build,
+# narrow enough that a step renamed today still reads as an alert.
+RECENT_BUILD_WINDOW = 3
 
 
 def _cell_id(model: str, shape: str, mode: str, router: str) -> str:
@@ -55,35 +53,26 @@ def _cell_id(model: str, shape: str, mode: str, router: str) -> str:
 
 
 def expected_cells() -> list[dict]:
-    """Enumerate the grid as defined in pipeline-disagg.yaml.
+    """Enumerate every grid as defined in pipeline-disagg.yaml.
 
     Enumerated rather than derived from observed records so that a cell which
-    never ran renders as ``never_run`` instead of vanishing.
+    never ran renders as ``never_run`` instead of vanishing — which is the only
+    way the wide-EP 2P2D gap is visible at all.
     """
     cells = []
-    for model in MODELS:
-        for shape in SHAPES:
-            for router in ROUTERS:
-                cells.append({
-                    "cell_id": _cell_id(model, shape, DEFAULT_MODE, router),
-                    "model": model,
-                    "shape": shape,
-                    "mode": DEFAULT_MODE,
-                    "transport": TRANSPORT,
-                    "router": router,
-                    "enabled": True,
-                })
-    for label in DISABLED_LABELS:
-        cell = parse_label(label)
-        cells.append({
-            "cell_id": cell.cell_id,
-            "model": cell.model,
-            "shape": cell.shape,
-            "mode": cell.mode,
-            "transport": cell.transport,
-            "router": cell.router,
-            "enabled": False,
-        })
+    for grid in GRIDS:
+        for model in MODELS:
+            for shape in grid["shapes"]:
+                for router in grid["routers"]:
+                    cells.append({
+                        "cell_id": _cell_id(model, shape, grid["mode"], router),
+                        "grid": grid["key"],
+                        "model": model,
+                        "shape": shape,
+                        "mode": grid["mode"],
+                        "transport": TRANSPORT,
+                        "router": router,
+                    })
     return cells
 
 
@@ -140,10 +129,9 @@ def summarize_cell(cell: dict, records: list[dict]) -> dict:
     out["rate_is_reportable"] = len(completed) >= MIN_SAMPLES_FOR_RATE
     out["flips"] = _count_flips(verdicts)
     out["last_verdict"] = attempts[-1]["verdict"] if attempts else "never_run"
+    out["last_build"] = attempts[-1]["build_number"] if attempts else None
     out["median_runtime_s"] = _median(a["runtime_s"] for a in attempts)
     out["median_queue_wait_s"] = _median(a["queue_wait_s"] for a in attempts)
-    if not cell["enabled"]:
-        out["last_verdict"] = "disabled" if not attempts else out["last_verdict"]
     return out
 
 
@@ -230,21 +218,30 @@ def build_grid(records: list[dict]) -> dict:
     cells = [summarize_cell(c, by_cell.get(c["cell_id"], [])) for c in expected_cells()]
 
     # A cell observed in the data but absent from the enumerated grid means a
-    # step was added or renamed upstream. Surface it rather than dropping it.
+    # step was added or renamed upstream. Surface it rather than dropping it —
+    # but a step renamed today and one dead for months want opposite volumes,
+    # so split them on whether the cell still appears in the recent builds.
+    recent = {b for b in sorted(
+        {r.get("build_number") for r in records if r.get("build_number") is not None},
+        reverse=True,
+    )[:RECENT_BUILD_WINDOW]}
+
     known = {c["cell_id"] for c in cells}
     for cell_id, cell_records in sorted(by_cell.items()):
         if cell_id in known:
             continue
         first = cell_records[0]
+        live = any(r.get("build_number") in recent for r in cell_records)
         cells.append(summarize_cell({
             "cell_id": cell_id,
+            "grid": None,
             "model": first.get("model", ""),
             "shape": first.get("shape", ""),
             "mode": first.get("mode", ""),
             "transport": first.get("transport", ""),
             "router": first.get("router", ""),
-            "enabled": True,
-            "unexpected": True,
+            "unexpected": live,
+            "retired": not live,
         }, cell_records))
 
     builds: dict[int, dict] = {}
@@ -266,14 +263,21 @@ def build_grid(records: list[dict]) -> dict:
         "pipeline": DI_PIPELINES[DI_KEY],
         "axes": {
             "models": list(MODELS),
-            "shapes": list(SHAPES),
-            "routers": list(ROUTERS),
             "transport": TRANSPORT,
-            # The matrix axis is (model, shape, router) only at this mode. The
-            # wide-EP cell shares all three with a live cell and is separated
-            # by mode alone, so a renderer keying without it silently hides
-            # the live cell.
-            "mode": DEFAULT_MODE,
+            # One entry per rendered grid. Mode is carried per grid rather than
+            # globally: a wide-EP cell shares model, shape and router with a
+            # TP8 cell, so a renderer keying without mode collapses the two.
+            "grids": [
+                {
+                    "key": g["key"],
+                    "title": g["title"],
+                    "mode": g["mode"],
+                    "shapes": list(g["shapes"]),
+                    "routers": list(g["routers"]),
+                    "note": g["note"],
+                }
+                for g in GRIDS
+            ],
         },
         "step_timeout_mins": STEP_TIMEOUT_MINS,
         "min_samples_for_rate": MIN_SAMPLES_FOR_RATE,

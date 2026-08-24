@@ -1,6 +1,6 @@
 {
-  "schema_version": 1,
-  "generated_at": "2026-08-24T07:34:14Z",
+  "schema_version": 2,
+  "generated_at": "2026-08-24T08:04:04Z",
   "pipeline": {
     "slug": "amd-distributed-inference-ci",
     "name_pattern": ".*",
@@ -15,16 +15,37 @@
       "Kimi-K2.6-MXFP4",
       "MiniMax-M3-MXFP8"
     ],
-    "shapes": [
-      "1P1D",
-      "2P2D"
-    ],
-    "routers": [
-      "proxy",
-      "vllm-router"
-    ],
     "transport": "MoRIIO",
-    "mode": "TP8"
+    "grids": [
+      {
+        "key": "tp8",
+        "title": "Tensor parallel \u2014 TP8",
+        "mode": "TP8",
+        "shapes": [
+          "1P1D",
+          "2P2D"
+        ],
+        "routers": [
+          "proxy",
+          "vllm-router"
+        ],
+        "note": "The original matrix. 1P1D = 2 nodes, 2P2D = 4 nodes."
+      },
+      {
+        "key": "wide-ep",
+        "title": "Wide expert parallel \u2014 EP8/DP8",
+        "mode": "EP8/DP8-WideEP",
+        "shapes": [
+          "1P1D",
+          "2P2D"
+        ],
+        "routers": [
+          "proxy",
+          "vllm-router"
+        ],
+        "note": "Commented out in pipeline-disagg.yaml until build 47 (2026-08-21). Only 1P1D is defined upstream so far."
+      }
+    ]
   },
   "step_timeout_mins": 120,
   "min_samples_for_rate": 5,
@@ -10215,12 +10236,12 @@
   "cells": [
     {
       "cell_id": "DeepSeek-V3|1P1D|TP8|MoRIIO|proxy",
+      "grid": "tp8",
       "model": "DeepSeek-V3",
       "shape": "1P1D",
       "mode": "TP8",
       "transport": "MoRIIO",
       "router": "proxy",
-      "enabled": true,
       "history": [
         {
           "build_number": 50,
@@ -10371,17 +10392,18 @@
       "rate_is_reportable": true,
       "flips": 13,
       "last_verdict": "failed",
+      "last_build": 50,
       "median_runtime_s": 1889.2,
       "median_queue_wait_s": 0.5
     },
     {
       "cell_id": "DeepSeek-V3|1P1D|TP8|MoRIIO|vllm-router",
+      "grid": "tp8",
       "model": "DeepSeek-V3",
       "shape": "1P1D",
       "mode": "TP8",
       "transport": "MoRIIO",
       "router": "vllm-router",
-      "enabled": true,
       "history": [
         {
           "build_number": 50,
@@ -10532,17 +10554,18 @@
       "rate_is_reportable": true,
       "flips": 11,
       "last_verdict": "failed",
+      "last_build": 50,
       "median_runtime_s": 2009.9,
       "median_queue_wait_s": 0.5
     },
     {
       "cell_id": "DeepSeek-V3|2P2D|TP8|MoRIIO|proxy",
+      "grid": "tp8",
       "model": "DeepSeek-V3",
       "shape": "2P2D",
       "mode": "TP8",
       "transport": "MoRIIO",
       "router": "proxy",
-      "enabled": true,
       "history": [
         {
           "build_number": 50,
@@ -10693,17 +10716,18 @@
       "rate_is_reportable": true,
       "flips": 18,
       "last_verdict": "failed",
+      "last_build": 50,
       "median_runtime_s": 1890.5,
       "median_queue_wait_s": 0.6
     },
     {
       "cell_id": "DeepSeek-V3|2P2D|TP8|MoRIIO|vllm-router",
+      "grid": "tp8",
       "model": "DeepSeek-V3",
       "shape": "2P2D",
       "mode": "TP8",
       "transport": "MoRIIO",
       "router": "vllm-router",
-      "enabled": true,
       "history": [
         {
           "build_number": 50,
@@ -10854,17 +10878,18 @@
       "rate_is_reportable": true,
       "flips": 13,
       "last_verdict": "failed",
+      "last_build": 50,
       "median_runtime_s": 2750.8,
       "median_queue_wait_s": 0.6
     },
     {
       "cell_id": "DeepSeek-R1-MXFP4|1P1D|TP8|MoRIIO|proxy",
+      "grid": "tp8",
       "model": "DeepSeek-R1-MXFP4",
       "shape": "1P1D",
       "mode": "TP8",
       "transport": "MoRIIO",
       "router": "proxy",
-      "enabled": true,
       "history": [
         {
           "build_number": 50,
@@ -11015,17 +11040,18 @@
       "rate_is_reportable": true,
       "flips": 11,
       "last_verdict": "failed",
+      "last_build": 50,
       "median_runtime_s": 1035.4,
       "median_queue_wait_s": 0.4
     },
     {
       "cell_id": "DeepSeek-R1-MXFP4|1P1D|TP8|MoRIIO|vllm-router",
+      "grid": "tp8",
       "model": "DeepSeek-R1-MXFP4",
       "shape": "1P1D",
       "mode": "TP8",
       "transport": "MoRIIO",
       "router": "vllm-router",
-      "enabled": true,
       "history": [
         {
           "build_number": 50,
@@ -11176,17 +11202,18 @@
       "rate_is_reportable": true,
       "flips": 18,
       "last_verdict": "failed",
+      "last_build": 50,
       "median_runtime_s": 1046.4,
       "median_queue_wait_s": 0.5
     },
     {
       "cell_id": "DeepSeek-R1-MXFP4|2P2D|TP8|MoRIIO|proxy",
+      "grid": "tp8",
       "model": "DeepSeek-R1-MXFP4",
       "shape": "2P2D",
       "mode": "TP8",
       "transport": "MoRIIO",
       "router": "proxy",
-      "enabled": true,
       "history": [
         {
           "build_number": 50,
@@ -11337,17 +11364,18 @@
       "rate_is_reportable": true,
       "flips": 16,
       "last_verdict": "failed",
+      "last_build": 50,
       "median_runtime_s": 1728.2,
       "median_queue_wait_s": 0.5
     },
     {
       "cell_id": "DeepSeek-R1-MXFP4|2P2D|TP8|MoRIIO|vllm-router",
+      "grid": "tp8",
       "model": "DeepSeek-R1-MXFP4",
       "shape": "2P2D",
       "mode": "TP8",
       "transport": "MoRIIO",
       "router": "vllm-router",
-      "enabled": true,
       "history": [
         {
           "build_number": 50,
@@ -11498,17 +11526,18 @@
       "rate_is_reportable": true,
       "flips": 6,
       "last_verdict": "failed",
+      "last_build": 50,
       "median_runtime_s": 2288.2,
       "median_queue_wait_s": 0.5
     },
     {
       "cell_id": "Kimi-K2.5-MXFP4|1P1D|TP8|MoRIIO|proxy",
+      "grid": "tp8",
       "model": "Kimi-K2.5-MXFP4",
       "shape": "1P1D",
       "mode": "TP8",
       "transport": "MoRIIO",
       "router": "proxy",
-      "enabled": true,
       "history": [
         {
           "build_number": 50,
@@ -11659,17 +11688,18 @@
       "rate_is_reportable": true,
       "flips": 4,
       "last_verdict": "failed",
+      "last_build": 50,
       "median_runtime_s": 1401.2,
       "median_queue_wait_s": 0.5
     },
     {
       "cell_id": "Kimi-K2.5-MXFP4|1P1D|TP8|MoRIIO|vllm-router",
+      "grid": "tp8",
       "model": "Kimi-K2.5-MXFP4",
       "shape": "1P1D",
       "mode": "TP8",
       "transport": "MoRIIO",
       "router": "vllm-router",
-      "enabled": true,
       "history": [
         {
           "build_number": 50,
@@ -11820,17 +11850,18 @@
       "rate_is_reportable": true,
       "flips": 6,
       "last_verdict": "failed",
+      "last_build": 50,
       "median_runtime_s": 1183.5,
       "median_queue_wait_s": 0.5
     },
     {
       "cell_id": "Kimi-K2.5-MXFP4|2P2D|TP8|MoRIIO|proxy",
+      "grid": "tp8",
       "model": "Kimi-K2.5-MXFP4",
       "shape": "2P2D",
       "mode": "TP8",
       "transport": "MoRIIO",
       "router": "proxy",
-      "enabled": true,
       "history": [
         {
           "build_number": 50,
@@ -11981,17 +12012,18 @@
       "rate_is_reportable": true,
       "flips": 4,
       "last_verdict": "failed",
+      "last_build": 50,
       "median_runtime_s": 1345.9,
       "median_queue_wait_s": 0.4
     },
     {
       "cell_id": "Kimi-K2.5-MXFP4|2P2D|TP8|MoRIIO|vllm-router",
+      "grid": "tp8",
       "model": "Kimi-K2.5-MXFP4",
       "shape": "2P2D",
       "mode": "TP8",
       "transport": "MoRIIO",
       "router": "vllm-router",
-      "enabled": true,
       "history": [
         {
           "build_number": 50,
@@ -12142,17 +12174,18 @@
       "rate_is_reportable": true,
       "flips": 6,
       "last_verdict": "failed",
+      "last_build": 50,
       "median_runtime_s": 1478.7,
       "median_queue_wait_s": 0.5
     },
     {
       "cell_id": "Kimi-K2.6-MXFP4|1P1D|TP8|MoRIIO|proxy",
+      "grid": "tp8",
       "model": "Kimi-K2.6-MXFP4",
       "shape": "1P1D",
       "mode": "TP8",
       "transport": "MoRIIO",
       "router": "proxy",
-      "enabled": true,
       "history": [
         {
           "build_number": 50,
@@ -12303,17 +12336,18 @@
       "rate_is_reportable": true,
       "flips": 8,
       "last_verdict": "failed",
+      "last_build": 50,
       "median_runtime_s": 1157.2,
       "median_queue_wait_s": 0.4
     },
     {
       "cell_id": "Kimi-K2.6-MXFP4|1P1D|TP8|MoRIIO|vllm-router",
+      "grid": "tp8",
       "model": "Kimi-K2.6-MXFP4",
       "shape": "1P1D",
       "mode": "TP8",
       "transport": "MoRIIO",
       "router": "vllm-router",
-      "enabled": true,
       "history": [
         {
           "build_number": 50,
@@ -12464,17 +12498,18 @@
       "rate_is_reportable": true,
       "flips": 11,
       "last_verdict": "failed",
+      "last_build": 50,
       "median_runtime_s": 1163.2,
       "median_queue_wait_s": 0.5
     },
     {
       "cell_id": "Kimi-K2.6-MXFP4|2P2D|TP8|MoRIIO|proxy",
+      "grid": "tp8",
       "model": "Kimi-K2.6-MXFP4",
       "shape": "2P2D",
       "mode": "TP8",
       "transport": "MoRIIO",
       "router": "proxy",
-      "enabled": true,
       "history": [
         {
           "build_number": 50,
@@ -12625,17 +12660,18 @@
       "rate_is_reportable": true,
       "flips": 4,
       "last_verdict": "failed",
+      "last_build": 50,
       "median_runtime_s": 1804.3,
       "median_queue_wait_s": 0.5
     },
     {
       "cell_id": "Kimi-K2.6-MXFP4|2P2D|TP8|MoRIIO|vllm-router",
+      "grid": "tp8",
       "model": "Kimi-K2.6-MXFP4",
       "shape": "2P2D",
       "mode": "TP8",
       "transport": "MoRIIO",
       "router": "vllm-router",
-      "enabled": true,
       "history": [
         {
           "build_number": 50,
@@ -12786,17 +12822,18 @@
       "rate_is_reportable": true,
       "flips": 12,
       "last_verdict": "failed",
+      "last_build": 50,
       "median_runtime_s": 1805.7,
       "median_queue_wait_s": 0.4
     },
     {
       "cell_id": "MiniMax-M3-MXFP8|1P1D|TP8|MoRIIO|proxy",
+      "grid": "tp8",
       "model": "MiniMax-M3-MXFP8",
       "shape": "1P1D",
       "mode": "TP8",
       "transport": "MoRIIO",
       "router": "proxy",
-      "enabled": true,
       "history": [
         {
           "build_number": 50,
@@ -12947,17 +12984,18 @@
       "rate_is_reportable": true,
       "flips": 19,
       "last_verdict": "passed",
+      "last_build": 50,
       "median_runtime_s": 829.2,
       "median_queue_wait_s": 0.5
     },
     {
       "cell_id": "MiniMax-M3-MXFP8|1P1D|TP8|MoRIIO|vllm-router",
+      "grid": "tp8",
       "model": "MiniMax-M3-MXFP8",
       "shape": "1P1D",
       "mode": "TP8",
       "transport": "MoRIIO",
       "router": "vllm-router",
-      "enabled": true,
       "history": [
         {
           "build_number": 50,
@@ -13108,17 +13146,18 @@
       "rate_is_reportable": true,
       "flips": 14,
       "last_verdict": "failed",
+      "last_build": 50,
       "median_runtime_s": 477.5,
       "median_queue_wait_s": 0.5
     },
     {
       "cell_id": "MiniMax-M3-MXFP8|2P2D|TP8|MoRIIO|proxy",
+      "grid": "tp8",
       "model": "MiniMax-M3-MXFP8",
       "shape": "2P2D",
       "mode": "TP8",
       "transport": "MoRIIO",
       "router": "proxy",
-      "enabled": true,
       "history": [
         {
           "build_number": 50,
@@ -13269,17 +13308,18 @@
       "rate_is_reportable": true,
       "flips": 12,
       "last_verdict": "failed",
+      "last_build": 50,
       "median_runtime_s": 1311.7,
       "median_queue_wait_s": 0.4
     },
     {
       "cell_id": "MiniMax-M3-MXFP8|2P2D|TP8|MoRIIO|vllm-router",
+      "grid": "tp8",
       "model": "MiniMax-M3-MXFP8",
       "shape": "2P2D",
       "mode": "TP8",
       "transport": "MoRIIO",
       "router": "vllm-router",
-      "enabled": true,
       "history": [
         {
           "build_number": 50,
@@ -13430,17 +13470,18 @@
       "rate_is_reportable": true,
       "flips": 13,
       "last_verdict": "passed",
+      "last_build": 50,
       "median_runtime_s": 1375.7,
       "median_queue_wait_s": 0.5
     },
     {
       "cell_id": "DeepSeek-V3|1P1D|EP8/DP8-WideEP|MoRIIO|proxy",
+      "grid": "wide-ep",
       "model": "DeepSeek-V3",
       "shape": "1P1D",
       "mode": "EP8/DP8-WideEP",
       "transport": "MoRIIO",
       "router": "proxy",
-      "enabled": false,
       "history": [
         {
           "build_number": 50,
@@ -13507,18 +13548,138 @@
       "rate_is_reportable": false,
       "flips": 1,
       "last_verdict": "failed",
+      "last_build": 50,
       "median_runtime_s": 1212.1,
       "median_queue_wait_s": 0.4
     },
     {
+      "cell_id": "DeepSeek-V3|1P1D|EP8/DP8-WideEP|MoRIIO|vllm-router",
+      "grid": "wide-ep",
+      "model": "DeepSeek-V3",
+      "shape": "1P1D",
+      "mode": "EP8/DP8-WideEP",
+      "transport": "MoRIIO",
+      "router": "vllm-router",
+      "history": [
+        {
+          "build_number": 50,
+          "date": "2026-08-23",
+          "verdict": "failed",
+          "state": "failed",
+          "runtime_s": 164.8,
+          "queue_wait_s": 0.5,
+          "agent_name": "spur-login-atl-3",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/50#01a02ffe-8192-4c9c-87c8-8686960ff448",
+          "phase": "",
+          "slurm_state": "",
+          "failure_class": "",
+          "reason": ""
+        },
+        {
+          "build_number": 49,
+          "date": "2026-08-22",
+          "verdict": "failed",
+          "state": "failed",
+          "runtime_s": 4262.1,
+          "queue_wait_s": 0.3,
+          "agent_name": "spur-login-atl-3",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/49#01a02ad8-254b-4d3f-8e62-7a42ef4c42fd",
+          "phase": "bringup",
+          "slurm_state": "FAILED",
+          "failure_class": "workload",
+          "reason": "gate"
+        },
+        {
+          "build_number": 48,
+          "date": "2026-08-21",
+          "verdict": "passed",
+          "state": "passed",
+          "runtime_s": 987.6,
+          "queue_wait_s": 0.3,
+          "agent_name": "spur-login-atl-2",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/48#01a025b1-c5a0-4c2a-a0b2-cb3421815f1e",
+          "phase": "workload",
+          "slurm_state": "COMPLETED",
+          "failure_class": "ok",
+          "reason": "sentinel"
+        },
+        {
+          "build_number": 47,
+          "date": "2026-08-21",
+          "verdict": "passed",
+          "state": "passed",
+          "runtime_s": 1344.6,
+          "queue_wait_s": 0.4,
+          "agent_name": "spur-login-atl-1",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/47#01a02265-904d-414d-91f3-0ea2f6d55e33",
+          "phase": "workload",
+          "slurm_state": "COMPLETED",
+          "failure_class": "ok",
+          "reason": "sentinel"
+        }
+      ],
+      "attempts": 4,
+      "completed": 4,
+      "passed": 2,
+      "failed": 2,
+      "pass_rate": 0.5,
+      "rate_is_reportable": false,
+      "flips": 1,
+      "last_verdict": "failed",
+      "last_build": 50,
+      "median_runtime_s": 1166.1,
+      "median_queue_wait_s": 0.3
+    },
+    {
+      "cell_id": "DeepSeek-V3|2P2D|EP8/DP8-WideEP|MoRIIO|proxy",
+      "grid": "wide-ep",
+      "model": "DeepSeek-V3",
+      "shape": "2P2D",
+      "mode": "EP8/DP8-WideEP",
+      "transport": "MoRIIO",
+      "router": "proxy",
+      "history": [],
+      "attempts": 0,
+      "completed": 0,
+      "passed": 0,
+      "failed": 0,
+      "pass_rate": null,
+      "rate_is_reportable": false,
+      "flips": 0,
+      "last_verdict": "never_run",
+      "last_build": null,
+      "median_runtime_s": null,
+      "median_queue_wait_s": null
+    },
+    {
+      "cell_id": "DeepSeek-V3|2P2D|EP8/DP8-WideEP|MoRIIO|vllm-router",
+      "grid": "wide-ep",
+      "model": "DeepSeek-V3",
+      "shape": "2P2D",
+      "mode": "EP8/DP8-WideEP",
+      "transport": "MoRIIO",
+      "router": "vllm-router",
+      "history": [],
+      "attempts": 0,
+      "completed": 0,
+      "passed": 0,
+      "failed": 0,
+      "pass_rate": null,
+      "rate_is_reportable": false,
+      "flips": 0,
+      "last_verdict": "never_run",
+      "last_build": null,
+      "median_runtime_s": null,
+      "median_queue_wait_s": null
+    },
+    {
       "cell_id": "DeepSeek-R1-MXFP4|1P1D|EP8/DP8-WideEP|MoRIIO|proxy",
+      "grid": "wide-ep",
       "model": "DeepSeek-R1-MXFP4",
       "shape": "1P1D",
       "mode": "EP8/DP8-WideEP",
       "transport": "MoRIIO",
       "router": "proxy",
-      "enabled": true,
-      "unexpected": true,
       "history": [
         {
           "build_number": 50,
@@ -13585,18 +13746,18 @@
       "rate_is_reportable": false,
       "flips": 1,
       "last_verdict": "failed",
+      "last_build": 50,
       "median_runtime_s": 4420.1,
       "median_queue_wait_s": 0.4
     },
     {
       "cell_id": "DeepSeek-R1-MXFP4|1P1D|EP8/DP8-WideEP|MoRIIO|vllm-router",
+      "grid": "wide-ep",
       "model": "DeepSeek-R1-MXFP4",
       "shape": "1P1D",
       "mode": "EP8/DP8-WideEP",
       "transport": "MoRIIO",
       "router": "vllm-router",
-      "enabled": true,
-      "unexpected": true,
       "history": [
         {
           "build_number": 50,
@@ -13677,238 +13838,60 @@
       "rate_is_reportable": true,
       "flips": 2,
       "last_verdict": "failed",
+      "last_build": 50,
       "median_runtime_s": 793.0,
       "median_queue_wait_s": 0.4
     },
     {
-      "cell_id": "DeepSeek-R1-MXFP4|1P1D|TP8|MoRIIO|toy proxy",
+      "cell_id": "DeepSeek-R1-MXFP4|2P2D|EP8/DP8-WideEP|MoRIIO|proxy",
+      "grid": "wide-ep",
       "model": "DeepSeek-R1-MXFP4",
-      "shape": "1P1D",
-      "mode": "TP8",
+      "shape": "2P2D",
+      "mode": "EP8/DP8-WideEP",
       "transport": "MoRIIO",
-      "router": "toy proxy",
-      "enabled": true,
-      "unexpected": true,
-      "history": [
-        {
-          "build_number": 15,
-          "date": "2026-07-28",
-          "verdict": "canceled",
-          "state": "canceled",
-          "runtime_s": 3363.8,
-          "queue_wait_s": 0.5,
-          "agent_name": "spur-login-atl-4",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/15#019fa864-fb0a-47bf-97a8-28fa340fa84f",
-          "phase": "",
-          "slurm_state": "",
-          "failure_class": "",
-          "reason": ""
-        },
-        {
-          "build_number": 14,
-          "date": "2026-07-27",
-          "verdict": "passed",
-          "state": "passed",
-          "runtime_s": 943.6,
-          "queue_wait_s": 0.5,
-          "agent_name": "spur-login-atl-3",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/14#019fa2eb-d0b9-40b2-8e82-bf6c954c6bb2",
-          "phase": "workload",
-          "slurm_state": "COMPLETED",
-          "failure_class": "ok",
-          "reason": "gate"
-        },
-        {
-          "build_number": 10,
-          "date": "2026-07-23",
-          "verdict": "passed",
-          "state": "passed",
-          "runtime_s": 882.4,
-          "queue_wait_s": 0.5,
-          "agent_name": "spur-login-atl-4",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/10#019f92f8-1de4-433c-a125-9f89b9592d1a",
-          "phase": "workload",
-          "slurm_state": "COMPLETED",
-          "failure_class": "ok",
-          "reason": "sentinel"
-        }
-      ],
-      "attempts": 3,
-      "completed": 2,
-      "passed": 2,
+      "router": "proxy",
+      "history": [],
+      "attempts": 0,
+      "completed": 0,
+      "passed": 0,
       "failed": 0,
-      "pass_rate": 1.0,
+      "pass_rate": null,
       "rate_is_reportable": false,
       "flips": 0,
-      "last_verdict": "canceled",
-      "median_runtime_s": 943.6,
-      "median_queue_wait_s": 0.5
+      "last_verdict": "never_run",
+      "last_build": null,
+      "median_runtime_s": null,
+      "median_queue_wait_s": null
     },
     {
-      "cell_id": "DeepSeek-V3|1P1D|EP8/DP8-WideEP|MoRIIO|vllm-router",
-      "model": "DeepSeek-V3",
-      "shape": "1P1D",
+      "cell_id": "DeepSeek-R1-MXFP4|2P2D|EP8/DP8-WideEP|MoRIIO|vllm-router",
+      "grid": "wide-ep",
+      "model": "DeepSeek-R1-MXFP4",
+      "shape": "2P2D",
       "mode": "EP8/DP8-WideEP",
       "transport": "MoRIIO",
       "router": "vllm-router",
-      "enabled": true,
-      "unexpected": true,
-      "history": [
-        {
-          "build_number": 50,
-          "date": "2026-08-23",
-          "verdict": "failed",
-          "state": "failed",
-          "runtime_s": 164.8,
-          "queue_wait_s": 0.5,
-          "agent_name": "spur-login-atl-3",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/50#01a02ffe-8192-4c9c-87c8-8686960ff448",
-          "phase": "",
-          "slurm_state": "",
-          "failure_class": "",
-          "reason": ""
-        },
-        {
-          "build_number": 49,
-          "date": "2026-08-22",
-          "verdict": "failed",
-          "state": "failed",
-          "runtime_s": 4262.1,
-          "queue_wait_s": 0.3,
-          "agent_name": "spur-login-atl-3",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/49#01a02ad8-254b-4d3f-8e62-7a42ef4c42fd",
-          "phase": "bringup",
-          "slurm_state": "FAILED",
-          "failure_class": "workload",
-          "reason": "gate"
-        },
-        {
-          "build_number": 48,
-          "date": "2026-08-21",
-          "verdict": "passed",
-          "state": "passed",
-          "runtime_s": 987.6,
-          "queue_wait_s": 0.3,
-          "agent_name": "spur-login-atl-2",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/48#01a025b1-c5a0-4c2a-a0b2-cb3421815f1e",
-          "phase": "workload",
-          "slurm_state": "COMPLETED",
-          "failure_class": "ok",
-          "reason": "sentinel"
-        },
-        {
-          "build_number": 47,
-          "date": "2026-08-21",
-          "verdict": "passed",
-          "state": "passed",
-          "runtime_s": 1344.6,
-          "queue_wait_s": 0.4,
-          "agent_name": "spur-login-atl-1",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/47#01a02265-904d-414d-91f3-0ea2f6d55e33",
-          "phase": "workload",
-          "slurm_state": "COMPLETED",
-          "failure_class": "ok",
-          "reason": "sentinel"
-        }
-      ],
-      "attempts": 4,
-      "completed": 4,
-      "passed": 2,
-      "failed": 2,
-      "pass_rate": 0.5,
+      "history": [],
+      "attempts": 0,
+      "completed": 0,
+      "passed": 0,
+      "failed": 0,
+      "pass_rate": null,
       "rate_is_reportable": false,
-      "flips": 1,
-      "last_verdict": "failed",
-      "median_runtime_s": 1166.1,
-      "median_queue_wait_s": 0.3
-    },
-    {
-      "cell_id": "DeepSeek-V3|1P1D|TP8|MoRIIO|toy proxy",
-      "model": "DeepSeek-V3",
-      "shape": "1P1D",
-      "mode": "TP8",
-      "transport": "MoRIIO",
-      "router": "toy proxy",
-      "enabled": true,
-      "unexpected": true,
-      "history": [
-        {
-          "build_number": 15,
-          "date": "2026-07-28",
-          "verdict": "failed",
-          "state": "failed",
-          "runtime_s": 3144.9,
-          "queue_wait_s": 0.4,
-          "agent_name": "spur-login-atl-2",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/15#019fa864-fb04-499f-9f13-dbfb7957a4a8",
-          "phase": "workload",
-          "slurm_state": "FAILED",
-          "failure_class": "workload",
-          "reason": "gate"
-        },
-        {
-          "build_number": 14,
-          "date": "2026-07-27",
-          "verdict": "passed",
-          "state": "passed",
-          "runtime_s": 4206.6,
-          "queue_wait_s": 0.6,
-          "agent_name": "spur-login-atl-2",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/14#019fa24f-fd70-4c50-966c-51c337740516",
-          "phase": "workload",
-          "slurm_state": "COMPLETED",
-          "failure_class": "ok",
-          "reason": "sentinel"
-        },
-        {
-          "build_number": 13,
-          "date": "2026-07-24",
-          "verdict": "passed",
-          "state": "passed",
-          "runtime_s": 904.2,
-          "queue_wait_s": 0.6,
-          "agent_name": "spur-login-atl-1",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/13#019f9518-378a-42f7-a88c-a3fced6545dd",
-          "phase": "workload",
-          "slurm_state": "COMPLETED",
-          "failure_class": "ok",
-          "reason": "gate"
-        },
-        {
-          "build_number": 10,
-          "date": "2026-07-23",
-          "verdict": "passed",
-          "state": "passed",
-          "runtime_s": 1106.1,
-          "queue_wait_s": 0.5,
-          "agent_name": "spur-login-atl-4",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/10#019f92aa-b634-4f48-9ed1-6dad93d67b7d",
-          "phase": "workload",
-          "slurm_state": "COMPLETED",
-          "failure_class": "ok",
-          "reason": "gate"
-        }
-      ],
-      "attempts": 4,
-      "completed": 4,
-      "passed": 3,
-      "failed": 1,
-      "pass_rate": 0.75,
-      "rate_is_reportable": false,
-      "flips": 1,
-      "last_verdict": "failed",
-      "median_runtime_s": 2125.5,
-      "median_queue_wait_s": 0.6
+      "flips": 0,
+      "last_verdict": "never_run",
+      "last_build": null,
+      "median_runtime_s": null,
+      "median_queue_wait_s": null
     },
     {
       "cell_id": "Kimi-K2.5-MXFP4|1P1D|EP8/DP8-WideEP|MoRIIO|proxy",
+      "grid": "wide-ep",
       "model": "Kimi-K2.5-MXFP4",
       "shape": "1P1D",
       "mode": "EP8/DP8-WideEP",
       "transport": "MoRIIO",
       "router": "proxy",
-      "enabled": true,
-      "unexpected": true,
       "history": [
         {
           "build_number": 50,
@@ -13975,18 +13958,18 @@
       "rate_is_reportable": false,
       "flips": 1,
       "last_verdict": "failed",
+      "last_build": 50,
       "median_runtime_s": 776.3,
       "median_queue_wait_s": 0.4
     },
     {
       "cell_id": "Kimi-K2.5-MXFP4|1P1D|EP8/DP8-WideEP|MoRIIO|vllm-router",
+      "grid": "wide-ep",
       "model": "Kimi-K2.5-MXFP4",
       "shape": "1P1D",
       "mode": "EP8/DP8-WideEP",
       "transport": "MoRIIO",
       "router": "vllm-router",
-      "enabled": true,
-      "unexpected": true,
       "history": [
         {
           "build_number": 50,
@@ -14053,18 +14036,60 @@
       "rate_is_reportable": false,
       "flips": 1,
       "last_verdict": "failed",
+      "last_build": 50,
       "median_runtime_s": 664.5,
       "median_queue_wait_s": 0.4
     },
     {
+      "cell_id": "Kimi-K2.5-MXFP4|2P2D|EP8/DP8-WideEP|MoRIIO|proxy",
+      "grid": "wide-ep",
+      "model": "Kimi-K2.5-MXFP4",
+      "shape": "2P2D",
+      "mode": "EP8/DP8-WideEP",
+      "transport": "MoRIIO",
+      "router": "proxy",
+      "history": [],
+      "attempts": 0,
+      "completed": 0,
+      "passed": 0,
+      "failed": 0,
+      "pass_rate": null,
+      "rate_is_reportable": false,
+      "flips": 0,
+      "last_verdict": "never_run",
+      "last_build": null,
+      "median_runtime_s": null,
+      "median_queue_wait_s": null
+    },
+    {
+      "cell_id": "Kimi-K2.5-MXFP4|2P2D|EP8/DP8-WideEP|MoRIIO|vllm-router",
+      "grid": "wide-ep",
+      "model": "Kimi-K2.5-MXFP4",
+      "shape": "2P2D",
+      "mode": "EP8/DP8-WideEP",
+      "transport": "MoRIIO",
+      "router": "vllm-router",
+      "history": [],
+      "attempts": 0,
+      "completed": 0,
+      "passed": 0,
+      "failed": 0,
+      "pass_rate": null,
+      "rate_is_reportable": false,
+      "flips": 0,
+      "last_verdict": "never_run",
+      "last_build": null,
+      "median_runtime_s": null,
+      "median_queue_wait_s": null
+    },
+    {
       "cell_id": "Kimi-K2.6-MXFP4|1P1D|EP8/DP8-WideEP|MoRIIO|proxy",
+      "grid": "wide-ep",
       "model": "Kimi-K2.6-MXFP4",
       "shape": "1P1D",
       "mode": "EP8/DP8-WideEP",
       "transport": "MoRIIO",
       "router": "proxy",
-      "enabled": true,
-      "unexpected": true,
       "history": [
         {
           "build_number": 50,
@@ -14131,18 +14156,18 @@
       "rate_is_reportable": false,
       "flips": 1,
       "last_verdict": "failed",
+      "last_build": 50,
       "median_runtime_s": 790.9,
       "median_queue_wait_s": 0.3
     },
     {
       "cell_id": "Kimi-K2.6-MXFP4|1P1D|EP8/DP8-WideEP|MoRIIO|vllm-router",
+      "grid": "wide-ep",
       "model": "Kimi-K2.6-MXFP4",
       "shape": "1P1D",
       "mode": "EP8/DP8-WideEP",
       "transport": "MoRIIO",
       "router": "vllm-router",
-      "enabled": true,
-      "unexpected": true,
       "history": [
         {
           "build_number": 50,
@@ -14209,18 +14234,60 @@
       "rate_is_reportable": false,
       "flips": 1,
       "last_verdict": "failed",
+      "last_build": 50,
       "median_runtime_s": 824.6,
       "median_queue_wait_s": 0.4
     },
     {
+      "cell_id": "Kimi-K2.6-MXFP4|2P2D|EP8/DP8-WideEP|MoRIIO|proxy",
+      "grid": "wide-ep",
+      "model": "Kimi-K2.6-MXFP4",
+      "shape": "2P2D",
+      "mode": "EP8/DP8-WideEP",
+      "transport": "MoRIIO",
+      "router": "proxy",
+      "history": [],
+      "attempts": 0,
+      "completed": 0,
+      "passed": 0,
+      "failed": 0,
+      "pass_rate": null,
+      "rate_is_reportable": false,
+      "flips": 0,
+      "last_verdict": "never_run",
+      "last_build": null,
+      "median_runtime_s": null,
+      "median_queue_wait_s": null
+    },
+    {
+      "cell_id": "Kimi-K2.6-MXFP4|2P2D|EP8/DP8-WideEP|MoRIIO|vllm-router",
+      "grid": "wide-ep",
+      "model": "Kimi-K2.6-MXFP4",
+      "shape": "2P2D",
+      "mode": "EP8/DP8-WideEP",
+      "transport": "MoRIIO",
+      "router": "vllm-router",
+      "history": [],
+      "attempts": 0,
+      "completed": 0,
+      "passed": 0,
+      "failed": 0,
+      "pass_rate": null,
+      "rate_is_reportable": false,
+      "flips": 0,
+      "last_verdict": "never_run",
+      "last_build": null,
+      "median_runtime_s": null,
+      "median_queue_wait_s": null
+    },
+    {
       "cell_id": "MiniMax-M3-MXFP8|1P1D|EP8/DP8-WideEP|MoRIIO|proxy",
+      "grid": "wide-ep",
       "model": "MiniMax-M3-MXFP8",
       "shape": "1P1D",
       "mode": "EP8/DP8-WideEP",
       "transport": "MoRIIO",
       "router": "proxy",
-      "enabled": true,
-      "unexpected": true,
       "history": [
         {
           "build_number": 50,
@@ -14287,18 +14354,18 @@
       "rate_is_reportable": false,
       "flips": 1,
       "last_verdict": "failed",
+      "last_build": 50,
       "median_runtime_s": 2682.8,
       "median_queue_wait_s": 0.4
     },
     {
       "cell_id": "MiniMax-M3-MXFP8|1P1D|EP8/DP8-WideEP|MoRIIO|vllm-router",
+      "grid": "wide-ep",
       "model": "MiniMax-M3-MXFP8",
       "shape": "1P1D",
       "mode": "EP8/DP8-WideEP",
       "transport": "MoRIIO",
       "router": "vllm-router",
-      "enabled": true,
-      "unexpected": true,
       "history": [
         {
           "build_number": 50,
@@ -14365,8 +14432,197 @@
       "rate_is_reportable": false,
       "flips": 1,
       "last_verdict": "failed",
+      "last_build": 50,
       "median_runtime_s": 2524.6,
       "median_queue_wait_s": 0.3
+    },
+    {
+      "cell_id": "MiniMax-M3-MXFP8|2P2D|EP8/DP8-WideEP|MoRIIO|proxy",
+      "grid": "wide-ep",
+      "model": "MiniMax-M3-MXFP8",
+      "shape": "2P2D",
+      "mode": "EP8/DP8-WideEP",
+      "transport": "MoRIIO",
+      "router": "proxy",
+      "history": [],
+      "attempts": 0,
+      "completed": 0,
+      "passed": 0,
+      "failed": 0,
+      "pass_rate": null,
+      "rate_is_reportable": false,
+      "flips": 0,
+      "last_verdict": "never_run",
+      "last_build": null,
+      "median_runtime_s": null,
+      "median_queue_wait_s": null
+    },
+    {
+      "cell_id": "MiniMax-M3-MXFP8|2P2D|EP8/DP8-WideEP|MoRIIO|vllm-router",
+      "grid": "wide-ep",
+      "model": "MiniMax-M3-MXFP8",
+      "shape": "2P2D",
+      "mode": "EP8/DP8-WideEP",
+      "transport": "MoRIIO",
+      "router": "vllm-router",
+      "history": [],
+      "attempts": 0,
+      "completed": 0,
+      "passed": 0,
+      "failed": 0,
+      "pass_rate": null,
+      "rate_is_reportable": false,
+      "flips": 0,
+      "last_verdict": "never_run",
+      "last_build": null,
+      "median_runtime_s": null,
+      "median_queue_wait_s": null
+    },
+    {
+      "cell_id": "DeepSeek-R1-MXFP4|1P1D|TP8|MoRIIO|toy proxy",
+      "grid": null,
+      "model": "DeepSeek-R1-MXFP4",
+      "shape": "1P1D",
+      "mode": "TP8",
+      "transport": "MoRIIO",
+      "router": "toy proxy",
+      "unexpected": false,
+      "retired": true,
+      "history": [
+        {
+          "build_number": 15,
+          "date": "2026-07-28",
+          "verdict": "canceled",
+          "state": "canceled",
+          "runtime_s": 3363.8,
+          "queue_wait_s": 0.5,
+          "agent_name": "spur-login-atl-4",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/15#019fa864-fb0a-47bf-97a8-28fa340fa84f",
+          "phase": "",
+          "slurm_state": "",
+          "failure_class": "",
+          "reason": ""
+        },
+        {
+          "build_number": 14,
+          "date": "2026-07-27",
+          "verdict": "passed",
+          "state": "passed",
+          "runtime_s": 943.6,
+          "queue_wait_s": 0.5,
+          "agent_name": "spur-login-atl-3",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/14#019fa2eb-d0b9-40b2-8e82-bf6c954c6bb2",
+          "phase": "workload",
+          "slurm_state": "COMPLETED",
+          "failure_class": "ok",
+          "reason": "gate"
+        },
+        {
+          "build_number": 10,
+          "date": "2026-07-23",
+          "verdict": "passed",
+          "state": "passed",
+          "runtime_s": 882.4,
+          "queue_wait_s": 0.5,
+          "agent_name": "spur-login-atl-4",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/10#019f92f8-1de4-433c-a125-9f89b9592d1a",
+          "phase": "workload",
+          "slurm_state": "COMPLETED",
+          "failure_class": "ok",
+          "reason": "sentinel"
+        }
+      ],
+      "attempts": 3,
+      "completed": 2,
+      "passed": 2,
+      "failed": 0,
+      "pass_rate": 1.0,
+      "rate_is_reportable": false,
+      "flips": 0,
+      "last_verdict": "canceled",
+      "last_build": 15,
+      "median_runtime_s": 943.6,
+      "median_queue_wait_s": 0.5
+    },
+    {
+      "cell_id": "DeepSeek-V3|1P1D|TP8|MoRIIO|toy proxy",
+      "grid": null,
+      "model": "DeepSeek-V3",
+      "shape": "1P1D",
+      "mode": "TP8",
+      "transport": "MoRIIO",
+      "router": "toy proxy",
+      "unexpected": false,
+      "retired": true,
+      "history": [
+        {
+          "build_number": 15,
+          "date": "2026-07-28",
+          "verdict": "failed",
+          "state": "failed",
+          "runtime_s": 3144.9,
+          "queue_wait_s": 0.4,
+          "agent_name": "spur-login-atl-2",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/15#019fa864-fb04-499f-9f13-dbfb7957a4a8",
+          "phase": "workload",
+          "slurm_state": "FAILED",
+          "failure_class": "workload",
+          "reason": "gate"
+        },
+        {
+          "build_number": 14,
+          "date": "2026-07-27",
+          "verdict": "passed",
+          "state": "passed",
+          "runtime_s": 4206.6,
+          "queue_wait_s": 0.6,
+          "agent_name": "spur-login-atl-2",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/14#019fa24f-fd70-4c50-966c-51c337740516",
+          "phase": "workload",
+          "slurm_state": "COMPLETED",
+          "failure_class": "ok",
+          "reason": "sentinel"
+        },
+        {
+          "build_number": 13,
+          "date": "2026-07-24",
+          "verdict": "passed",
+          "state": "passed",
+          "runtime_s": 904.2,
+          "queue_wait_s": 0.6,
+          "agent_name": "spur-login-atl-1",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/13#019f9518-378a-42f7-a88c-a3fced6545dd",
+          "phase": "workload",
+          "slurm_state": "COMPLETED",
+          "failure_class": "ok",
+          "reason": "gate"
+        },
+        {
+          "build_number": 10,
+          "date": "2026-07-23",
+          "verdict": "passed",
+          "state": "passed",
+          "runtime_s": 1106.1,
+          "queue_wait_s": 0.5,
+          "agent_name": "spur-login-atl-4",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/10#019f92aa-b634-4f48-9ed1-6dad93d67b7d",
+          "phase": "workload",
+          "slurm_state": "COMPLETED",
+          "failure_class": "ok",
+          "reason": "gate"
+        }
+      ],
+      "attempts": 4,
+      "completed": 4,
+      "passed": 3,
+      "failed": 1,
+      "pass_rate": 0.75,
+      "rate_is_reportable": false,
+      "flips": 1,
+      "last_verdict": "failed",
+      "last_build": 15,
+      "median_runtime_s": 2125.5,
+      "median_queue_wait_s": 0.6
     }
   ],
   "unclassified": [
