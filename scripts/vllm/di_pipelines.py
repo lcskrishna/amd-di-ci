@@ -65,38 +65,48 @@ SHAPES = ("1P1D", "2P2D")
 ROUTERS = ("proxy", "vllm-router")
 TRANSPORT = "MoRIIO"
 
-# One grid per parallelism mode, rendered top to bottom in this order.
+# One grid per parallelism family, rendered top to bottom in this order.
 #
 # Mode is a grid selector, not a global constant: a wide-EP cell shares model,
 # shape and router with a TP8 cell and differs only by mode, so a single matrix
 # keyed on (model, shape, router) silently collapses the two into one.
 #
-# Both grids carry the full shape x router column set even though wide-EP only
-# runs 1P1D today. The empty 2P2D half *is* the coverage gap; a narrower table
-# would hide it.
+# Mode also varies *within* the wide-EP grid — expert parallelism scales with
+# node count, so 2P2D is EP16/DP16 where 1P1D is EP8/DP8 — which is why each
+# shape carries its own mode rather than inheriting one from the grid.
 #
 # ``mode`` is the label token and the cell key; ``mode_label`` is the shorter
 # form the column headers carry. Declared rather than derived from ``mode``,
 # because trimming "-WideEP" off the end is the kind of rule that quietly
 # mangles the next mode someone adds.
+#
+# Both grids carry the full shape x router column set even though wide-EP only
+# runs 1P1D today. The empty 2P2D half *is* the coverage gap; a narrower table
+# would hide it.
 GRIDS = (
     {
         "key": "tp8",
         "title": "PD Disagg with TP8",
-        "mode": "TP8",
-        "mode_label": "TP8",
-        "shapes": SHAPES,
+        "shapes": tuple(
+            {"shape": s, "mode": "TP8", "mode_label": "TP8"} for s in SHAPES
+        ),
         "routers": ROUTERS,
         "note": "The original matrix. 1P1D = 2 nodes, 2P2D = 4 nodes.",
     },
     {
         "key": "wide-ep",
-        "title": "Wide expert parallel — EP8/DP8",
-        "mode": "EP8/DP8-WideEP",
-        "mode_label": "EP8/DP8",
-        "shapes": SHAPES,
+        "title": "PD Disagg with Wide EP",
+        "shapes": (
+            {"shape": "1P1D", "mode": "EP8/DP8-WideEP", "mode_label": "EP8/DP8"},
+            # Not defined upstream yet, so this mode string is a prediction. If
+            # the step lands under a different name its records will surface in
+            # the unexpected-steps panel while this column still reads "never
+            # run" — which is the signal to come and fix this line.
+            {"shape": "2P2D", "mode": "EP16/DP16-WideEP", "mode_label": "EP16/DP16"},
+        ),
         "routers": ROUTERS,
-        "note": "Commented out in pipeline-disagg.yaml until build 47 "
-                "(2026-08-21). Only 1P1D is defined upstream so far.",
+        "note": "Live upstream from build 47 (2026-08-21). Expert parallelism "
+                "scales with node count, so 2P2D is EP16/DP16; only 1P1D is "
+                "defined upstream so far.",
     },
 )

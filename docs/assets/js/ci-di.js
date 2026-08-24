@@ -69,6 +69,19 @@
 
   // ── Panels ───────────────────────────────────────────────────────────────
 
+  // Every parallelism the grids cover, in render order and deduplicated: TP8
+  // appears on both shapes, wide-EP differs between them.
+  function modeLabels(g) {
+    var seen = [];
+    ((g.axes || {}).grids || []).forEach(function (grid) {
+      (grid.shapes || []).forEach(function (s) {
+        var label = s.mode_label || s.mode;
+        if (label && seen.indexOf(label) === -1) seen.push(label);
+      });
+    });
+    return seen;
+  }
+
   function header(g) {
     var last = (g.builds && g.builds[0]) || null;
     var p = g.pipeline || {};
@@ -220,9 +233,7 @@
       hwRow('Fabric', 'AINIC'),
       hwRow('Queue', 'amd_mi350_ainic'),
       hwRow('Topology', '1P1D = 2 nodes · 2P2D = 4 nodes'),
-      hwRow('Parallelism', ((g.axes || {}).grids || []).map(function (x) {
-        return x.mode;
-      }).join('  ·  ') || 'TP8'),
+      hwRow('Parallelism', modeLabels(g).join('  ·  ') || 'TP8'),
       hwRow('KV transport', (g.axes || {}).transport || 'MoRIIO'),
     ]), 'Fixed for every cell in the grid; the only hardware axis is node count.');
 
@@ -468,11 +479,13 @@
   }
 
   function gridTable(def, models, byKey, minSamples) {
-    var mode = def.mode;
-
+    // Each shape brings its own mode: within the wide-EP grid 1P1D is EP8/DP8
+    // and 2P2D is EP16/DP16, so a grid-level mode would mislabel half the table.
     var cols = [];
     (def.shapes || []).forEach(function (s) {
-      (def.routers || []).forEach(function (r) { cols.push({ shape: s, router: r }); });
+      (def.routers || []).forEach(function (r) {
+        cols.push({ shape: s.shape, mode: s.mode, label: s.mode_label || s.mode, router: r });
+      });
     });
 
     var th = function (t, extra) {
@@ -487,14 +500,13 @@
 
     // Shape, router and mode all in the header: the two grids are stacked, so a
     // column read out of context has to say which parallelism it belongs to.
-    var modeLabel = def.mode_label || def.mode;
     var head = h('tr', {}, [th('Model')].concat(cols.map(function (c) {
-      return th(c.shape + '.' + c.router + '.' + modeLabel);
+      return th(c.shape + '.' + c.router + '.' + c.label);
     })));
 
     var rows = models.map(function (m) {
       var cells = cols.map(function (c) {
-        return cellBox(byKey[[m, c.shape, mode, c.router].join('|')]);
+        return cellBox(byKey[[m, c.shape, c.mode, c.router].join('|')]);
       });
       var name = h('td', {
         style: {

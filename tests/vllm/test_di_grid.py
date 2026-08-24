@@ -54,6 +54,31 @@ def test_every_grid_is_enumerated_in_full():
     assert Counter(c["grid"] for c in cells) == {"tp8": 20, "wide-ep": 20}
 
 
+def test_expert_parallelism_scales_with_node_count():
+    # Wide-EP's mode is not constant across the grid: 2P2D is twice the nodes
+    # and twice the experts. Enumerating it as EP8/DP8 would leave the 2P2D
+    # column reading "never run" forever while the real runs pile up in the
+    # unexpected-steps panel.
+    modes = {
+        (c["grid"], c["shape"]): c["mode"]
+        for c in expected_cells()
+    }
+    assert modes[("tp8", "1P1D")] == modes[("tp8", "2P2D")] == "TP8"
+    assert modes[("wide-ep", "1P1D")] == "EP8/DP8-WideEP"
+    assert modes[("wide-ep", "2P2D")] == "EP16/DP16-WideEP"
+
+
+def test_a_real_wide_ep_2p2d_label_would_land_in_its_enumerated_cell():
+    # The mode string above is a prediction until upstream defines the step.
+    # This is the tripwire: if the label parses to something else, the cell it
+    # lands in stops matching and this fails.
+    label = "DeepSeek-V3-PD-2P2D-EP16/DP16-WideEP-MoRIIO-proxy"
+    cell = cell_by_id(build_grid([record(1, label=label)]), parse_label(label).cell_id)
+    assert (cell["grid"], cell["shape"]) == ("wide-ep", "2P2D")
+    assert cell["attempts"] == 1
+    assert not cell.get("unexpected")
+
+
 def test_cells_that_never_ran_are_rendered_not_omitted():
     grid = build_grid([])
     assert len(grid["cells"]) == 40

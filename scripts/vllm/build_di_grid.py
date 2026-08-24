@@ -62,14 +62,14 @@ def expected_cells() -> list[dict]:
     cells = []
     for grid in GRIDS:
         for model in MODELS:
-            for shape in grid["shapes"]:
+            for col in grid["shapes"]:
                 for router in grid["routers"]:
                     cells.append({
-                        "cell_id": _cell_id(model, shape, grid["mode"], router),
+                        "cell_id": _cell_id(model, col["shape"], col["mode"], router),
                         "grid": grid["key"],
                         "model": model,
-                        "shape": shape,
-                        "mode": grid["mode"],
+                        "shape": col["shape"],
+                        "mode": col["mode"],
                         "transport": TRANSPORT,
                         "router": router,
                     })
@@ -264,16 +264,15 @@ def build_grid(records: list[dict]) -> dict:
         "axes": {
             "models": list(MODELS),
             "transport": TRANSPORT,
-            # One entry per rendered grid. Mode is carried per grid rather than
-            # globally: a wide-EP cell shares model, shape and router with a
-            # TP8 cell, so a renderer keying without mode collapses the two.
+            # One entry per rendered grid, each shape carrying its own mode.
+            # A renderer that keys a cell without mode collapses the TP8 and
+            # wide-EP matrices into one; one that hoists mode to the grid gets
+            # wide-EP's 2P2D column wrong.
             "grids": [
                 {
                     "key": g["key"],
                     "title": g["title"],
-                    "mode": g["mode"],
-                    "mode_label": g["mode_label"],
-                    "shapes": list(g["shapes"]),
+                    "shapes": [dict(c) for c in g["shapes"]],
                     "routers": list(g["routers"]),
                     "note": g["note"],
                 }

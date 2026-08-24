@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-08-24T10:08:41Z",
+  "generated_at": "2026-08-24T10:34:11Z",
   "pipeline": {
     "slug": "amd-distributed-inference-ci",
     "name_pattern": ".*",
@@ -20,11 +20,17 @@
       {
         "key": "tp8",
         "title": "PD Disagg with TP8",
-        "mode": "TP8",
-        "mode_label": "TP8",
         "shapes": [
-          "1P1D",
-          "2P2D"
+          {
+            "shape": "1P1D",
+            "mode": "TP8",
+            "mode_label": "TP8"
+          },
+          {
+            "shape": "2P2D",
+            "mode": "TP8",
+            "mode_label": "TP8"
+          }
         ],
         "routers": [
           "proxy",
@@ -34,18 +40,24 @@
       },
       {
         "key": "wide-ep",
-        "title": "Wide expert parallel \u2014 EP8/DP8",
-        "mode": "EP8/DP8-WideEP",
-        "mode_label": "EP8/DP8",
+        "title": "PD Disagg with Wide EP",
         "shapes": [
-          "1P1D",
-          "2P2D"
+          {
+            "shape": "1P1D",
+            "mode": "EP8/DP8-WideEP",
+            "mode_label": "EP8/DP8"
+          },
+          {
+            "shape": "2P2D",
+            "mode": "EP16/DP16-WideEP",
+            "mode_label": "EP16/DP16"
+          }
         ],
         "routers": [
           "proxy",
           "vllm-router"
         ],
-        "note": "Commented out in pipeline-disagg.yaml until build 47 (2026-08-21). Only 1P1D is defined upstream so far."
+        "note": "Live upstream from build 47 (2026-08-21). Expert parallelism scales with node count, so 2P2D is EP16/DP16; only 1P1D is defined upstream so far."
       }
     ]
   },
@@ -13633,11 +13645,11 @@
       "median_queue_wait_s": 0.3
     },
     {
-      "cell_id": "DeepSeek-V3|2P2D|EP8/DP8-WideEP|MoRIIO|proxy",
+      "cell_id": "DeepSeek-V3|2P2D|EP16/DP16-WideEP|MoRIIO|proxy",
       "grid": "wide-ep",
       "model": "DeepSeek-V3",
       "shape": "2P2D",
-      "mode": "EP8/DP8-WideEP",
+      "mode": "EP16/DP16-WideEP",
       "transport": "MoRIIO",
       "router": "proxy",
       "history": [],
@@ -13654,11 +13666,11 @@
       "median_queue_wait_s": null
     },
     {
-      "cell_id": "DeepSeek-V3|2P2D|EP8/DP8-WideEP|MoRIIO|vllm-router",
+      "cell_id": "DeepSeek-V3|2P2D|EP16/DP16-WideEP|MoRIIO|vllm-router",
       "grid": "wide-ep",
       "model": "DeepSeek-V3",
       "shape": "2P2D",
-      "mode": "EP8/DP8-WideEP",
+      "mode": "EP16/DP16-WideEP",
       "transport": "MoRIIO",
       "router": "vllm-router",
       "history": [],
@@ -13845,11 +13857,11 @@
       "median_queue_wait_s": 0.4
     },
     {
-      "cell_id": "DeepSeek-R1-MXFP4|2P2D|EP8/DP8-WideEP|MoRIIO|proxy",
+      "cell_id": "DeepSeek-R1-MXFP4|2P2D|EP16/DP16-WideEP|MoRIIO|proxy",
       "grid": "wide-ep",
       "model": "DeepSeek-R1-MXFP4",
       "shape": "2P2D",
-      "mode": "EP8/DP8-WideEP",
+      "mode": "EP16/DP16-WideEP",
       "transport": "MoRIIO",
       "router": "proxy",
       "history": [],
@@ -13866,11 +13878,11 @@
       "median_queue_wait_s": null
     },
     {
-      "cell_id": "DeepSeek-R1-MXFP4|2P2D|EP8/DP8-WideEP|MoRIIO|vllm-router",
+      "cell_id": "DeepSeek-R1-MXFP4|2P2D|EP16/DP16-WideEP|MoRIIO|vllm-router",
       "grid": "wide-ep",
       "model": "DeepSeek-R1-MXFP4",
       "shape": "2P2D",
-      "mode": "EP8/DP8-WideEP",
+      "mode": "EP16/DP16-WideEP",
       "transport": "MoRIIO",
       "router": "vllm-router",
       "history": [],
@@ -14043,11 +14055,11 @@
       "median_queue_wait_s": 0.4
     },
     {
-      "cell_id": "Kimi-K2.5-MXFP4|2P2D|EP8/DP8-WideEP|MoRIIO|proxy",
+      "cell_id": "Kimi-K2.5-MXFP4|2P2D|EP16/DP16-WideEP|MoRIIO|proxy",
       "grid": "wide-ep",
       "model": "Kimi-K2.5-MXFP4",
       "shape": "2P2D",
-      "mode": "EP8/DP8-WideEP",
+      "mode": "EP16/DP16-WideEP",
       "transport": "MoRIIO",
       "router": "proxy",
       "history": [],
@@ -14064,11 +14076,11 @@
       "median_queue_wait_s": null
     },
     {
-      "cell_id": "Kimi-K2.5-MXFP4|2P2D|EP8/DP8-WideEP|MoRIIO|vllm-router",
+      "cell_id": "Kimi-K2.5-MXFP4|2P2D|EP16/DP16-WideEP|MoRIIO|vllm-router",
       "grid": "wide-ep",
       "model": "Kimi-K2.5-MXFP4",
       "shape": "2P2D",
-      "mode": "EP8/DP8-WideEP",
+      "mode": "EP16/DP16-WideEP",
       "transport": "MoRIIO",
       "router": "vllm-router",
       "history": [],
@@ -14241,11 +14253,11 @@
       "median_queue_wait_s": 0.4
     },
     {
-      "cell_id": "Kimi-K2.6-MXFP4|2P2D|EP8/DP8-WideEP|MoRIIO|proxy",
+      "cell_id": "Kimi-K2.6-MXFP4|2P2D|EP16/DP16-WideEP|MoRIIO|proxy",
       "grid": "wide-ep",
       "model": "Kimi-K2.6-MXFP4",
       "shape": "2P2D",
-      "mode": "EP8/DP8-WideEP",
+      "mode": "EP16/DP16-WideEP",
       "transport": "MoRIIO",
       "router": "proxy",
       "history": [],
@@ -14262,11 +14274,11 @@
       "median_queue_wait_s": null
     },
     {
-      "cell_id": "Kimi-K2.6-MXFP4|2P2D|EP8/DP8-WideEP|MoRIIO|vllm-router",
+      "cell_id": "Kimi-K2.6-MXFP4|2P2D|EP16/DP16-WideEP|MoRIIO|vllm-router",
       "grid": "wide-ep",
       "model": "Kimi-K2.6-MXFP4",
       "shape": "2P2D",
-      "mode": "EP8/DP8-WideEP",
+      "mode": "EP16/DP16-WideEP",
       "transport": "MoRIIO",
       "router": "vllm-router",
       "history": [],
@@ -14439,11 +14451,11 @@
       "median_queue_wait_s": 0.3
     },
     {
-      "cell_id": "MiniMax-M3-MXFP8|2P2D|EP8/DP8-WideEP|MoRIIO|proxy",
+      "cell_id": "MiniMax-M3-MXFP8|2P2D|EP16/DP16-WideEP|MoRIIO|proxy",
       "grid": "wide-ep",
       "model": "MiniMax-M3-MXFP8",
       "shape": "2P2D",
-      "mode": "EP8/DP8-WideEP",
+      "mode": "EP16/DP16-WideEP",
       "transport": "MoRIIO",
       "router": "proxy",
       "history": [],
@@ -14460,11 +14472,11 @@
       "median_queue_wait_s": null
     },
     {
-      "cell_id": "MiniMax-M3-MXFP8|2P2D|EP8/DP8-WideEP|MoRIIO|vllm-router",
+      "cell_id": "MiniMax-M3-MXFP8|2P2D|EP16/DP16-WideEP|MoRIIO|vllm-router",
       "grid": "wide-ep",
       "model": "MiniMax-M3-MXFP8",
       "shape": "2P2D",
-      "mode": "EP8/DP8-WideEP",
+      "mode": "EP16/DP16-WideEP",
       "transport": "MoRIIO",
       "router": "vllm-router",
       "history": [],
