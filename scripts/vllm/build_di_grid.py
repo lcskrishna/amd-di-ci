@@ -128,8 +128,12 @@ def summarize_cell(cell: dict, records: list[dict]) -> dict:
     out["pass_rate"] = round(passed / len(completed), 4) if completed else None
     out["rate_is_reportable"] = len(completed) >= MIN_SAMPLES_FOR_RATE
     out["flips"] = _count_flips(verdicts)
-    out["last_verdict"] = attempts[-1]["verdict"] if attempts else "never_run"
-    out["last_build"] = attempts[-1]["build_number"] if attempts else None
+    # A retry that is still queued or running is not a result. Buildkite emits
+    # it as a second record for the same cell and build, and taking the newest
+    # record outright let that retry hide the failure it was retrying.
+    settled = [a for a in attempts if a["verdict"] in TERMINAL_VERDICTS]
+    out["last_verdict"] = settled[-1]["verdict"] if settled else "never_run"
+    out["last_build"] = settled[-1]["build_number"] if settled else None
     out["median_runtime_s"] = _median(a["runtime_s"] for a in attempts)
     out["median_queue_wait_s"] = _median(a["queue_wait_s"] for a in attempts)
     return out

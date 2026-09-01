@@ -146,6 +146,21 @@ def test_pass_rate_and_history_order():
     assert cell["last_verdict"] == "failed"
 
 
+def test_an_unfinished_retry_does_not_hide_the_failure_it_retried():
+    # Buildkite emits a retry as a second record for the same cell and build.
+    # While it is still running it carries no verdict, so the cell's condition
+    # must keep reading from the failure until the retry actually settles.
+    records = [
+        record(1, state="passed"),
+        record(2, state="failed"),
+        record(2, state="running"),
+    ]
+    cell = cell_by_id(build_grid(records), CELL_ID)
+    assert cell["last_verdict"] == "failed"
+    assert cell["last_build"] == 2
+    assert cell["completed"] == 2
+
+
 def test_a_thin_sample_is_marked_unreportable():
     # 120-minute jobs on a scarce allocation: three samples is normal, and a
     # confident percentage from three samples is a lie.
