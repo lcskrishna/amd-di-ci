@@ -146,6 +146,17 @@ def test_pass_rate_and_history_order():
     assert cell["last_verdict"] == "failed"
 
 
+def test_a_retried_build_scores_once_per_cell_and_takes_the_retry():
+    # Buildkite reports the build passed when the final attempt passes, and the
+    # dashboard has to agree: one cell, one outcome, not two records.
+    grid = build_grid([record(7, state="failed"), record(7, state="passed")])
+    cell = cell_by_id(grid, CELL_ID)
+    assert (cell["completed"], cell["passed"]) == (1, 1)
+    assert cell["last_verdict"] == "passed"
+    model = grid["build_rollup"][0]["models"]["DeepSeek-V3"]
+    assert (model["completed"], model["passed"]) == (1, 1)
+
+
 def test_an_unfinished_retry_does_not_hide_the_failure_it_retried():
     # Buildkite emits a retry as a second record for the same cell and build.
     # While it is still running it carries no verdict, so the cell's condition

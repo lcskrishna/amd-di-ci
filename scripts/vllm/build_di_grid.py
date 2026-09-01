@@ -94,6 +94,38 @@ def _attempt(record: dict) -> dict:
     }
 
 
+def _collapse_retries(records: list[dict]) -> list[dict]:
+    """One outcome per cell per build — the build's own view of itself.
+
+    A retried step arrives as a second record for the same cell and build, so
+    counting records scores one cell twice and reports a green build as
+    partial. Buildkite calls the build passed when the final attempt passes,
+    and that is the number the dashboard has to agree with.
+
+    Preference is by outcome rather than by arrival order because a retry only
+    ever follows a failure: a pass supersedes, an unfinished retry does not
+    erase the failure it is retrying.
+    """
+    def rank(record: dict) -> int:
+        verdict = record.get("verdict", "")
+        if verdict == "passed":
+            return 2
+        return 1 if verdict in TERMINAL_VERDICTS else 0
+
+    best: dict[tuple, dict] = {}
+    passthrough: list[dict] = []
+    for r in records:
+        cell_id = r.get("cell_id") or ""
+        number = r.get("build_number")
+        if not cell_id or number is None:
+            passthrough.append(r)
+            continue
+        key = (cell_id, number)
+        if key not in best or rank(r) >= rank(best[key]):
+            best[key] = r
+    return passthrough + list(best.values())
+
+
 def _median(values: Iterable[Optional[float]]) -> Optional[float]:
     nums = [v for v in values if isinstance(v, (int, float))]
     return round(statistics.median(nums), 1) if nums else None
@@ -211,9 +243,16 @@ def build_rollup(records: list[dict]) -> list[dict]:
 
 def build_grid(records: list[dict]) -> dict:
     """Assemble the full grid payload from job records."""
+    # The grid and the per-build rollup score cells, so they read the collapsed
+    # view. agent_attribution and failure_classes stay on the raw records: a
+    # failure that a retry later papered over is still evidence about the box
+    # it ran on, and losing it would hide exactly the sick-agent pattern those
+    # panels exist to find.
+    settled_records = _collapse_retries(records)
+
     by_cell: dict[str, list[dict]] = {}
     unclassified: list[dict] = []
-    for r in records:
+    for r in settled_records:
         if not r.get("label_ok"):
             unclassified.append(_attempt(r) | {"label": r.get("label", "")})
             continue
@@ -286,7 +325,7 @@ def build_grid(records: list[dict]) -> dict:
         "step_timeout_mins": STEP_TIMEOUT_MINS,
         "min_samples_for_rate": MIN_SAMPLES_FOR_RATE,
         "builds": sorted(builds.values(), key=lambda b: b["build_number"], reverse=True),
-        "build_rollup": build_rollup(records),
+        "build_rollup": build_rollup(settled_records),
         "cells": cells,
         "unclassified": unclassified,
         "agents": agent_attribution(records),
