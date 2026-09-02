@@ -17,7 +17,10 @@ on:
       days:
         description: 'Days of history to fetch'
         required: false
-        default: '30'
+        # The window only governs collection. jobs.jsonl is never pruned and
+        # the grid renders all of it, so a short window still draws the full
+        # history — it just stops re-walking builds that already settled.
+        default: '4'
       no_logs:
         description: 'Skip job logs (loses the SLURM phase/reason verdict)'
         type: boolean
@@ -38,6 +41,13 @@ on:
       - 'docs/assets/js/utils.js'
       - 'scripts/build_di_site.py'
       - '.github/workflows/di-collect.yml'
+
+# Buildkite allows 50 requests/minute per authenticated user, and every
+# workflow here shares one token. Runners are separate VMs with nothing to
+# coordinate through, so the ceiling is divided up statically instead:
+# hourly-master 20 + di-collect 15 + queue-monitor 8 + queue-lifecycle 5 = 48.
+env:
+  BUILDKITE_MAX_RPM: '15'
 
 concurrency:
   group: di-collect
@@ -61,7 +71,7 @@ jobs:
 
       - name: Collect DI data
         run: |
-          ARGS="--days ${{ github.event.inputs.days || '30' }}"
+          ARGS="--days ${{ github.event.inputs.days || '4' }}"
           if [ "${{ github.event.inputs.no_logs }}" = "true" ]; then
             ARGS="$ARGS --no-logs"
           fi

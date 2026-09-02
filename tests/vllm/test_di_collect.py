@@ -2,6 +2,7 @@
 
 import json
 
+from vllm import di_collect
 from vllm.di_collect import (
     classify_state,
     di_jobs,
@@ -222,3 +223,120 @@ def test_load_skips_a_truncated_final_line(tmp_path):
     path = tmp_path / "jobs.jsonl"
     path.write_text(json.dumps({"build_number": 1, "job_id": "a"}) + "\n{\"partial\"")
     assert len(load_job_records(path)) == 1
+
+
+# ---------------------------------------------------------------------------
+# Log caching
+#
+# A terminal job's log never changes, so re-downloading ~440 of them every
+# three hours was this repo's entire Buildkite rate-limit problem.
+# ---------------------------------------------------------------------------
+
+VERDICT_LINE = (
+    "[slurm-submit] job 4821 finished: state=completed phase=workload "
+    "exit=0 reason=ok"
+)
+
+
+def _spy_fetch(monkeypatch, text, scanned=True):
+    """Replace the log download and count how many times it is called."""
+    calls = []
+
+    def fake(job):
+        calls.append(job.get("id"))
+        return text, scanned
+
+    monkeypatch.setattr(di_collect, "fetch_job_log_result", fake)
+    return calls
+
+
+def test_a_log_already_read_is_not_downloaded_again(monkeypatch):
+    calls = _spy_fetch(monkeypatch, VERDICT_LINE)
+    job = _job()
+    cached = {(412, "job-1"): {"failure_class": "ok", "slurm_state": "completed",
+                              "log_scanned": True}}
+    out = di_collect._verdicts_for_jobs([job], cached, 412)
+    assert calls == []
+    assert out["job-1"]["failure_class"] == "ok"
+
+
+def test_a_job_never_seen_before_is_downloaded(monkeypatch):
+    calls = _spy_fetch(monkeypatch, VERDICT_LINE)
+    out = di_collect._verdicts_for_jobs([_job()], {}, 412)
+    assert calls == ["job-1"]
+    assert out["job-1"]["failure_class"] == "ok"
+    assert out["job-1"]["log_scanned"] is True
+
+
+def test_a_record_predating_the_marker_is_trusted_if_it_holds_a_verdict(monkeypatch):
+    # Backfill path: thousands of records were written before log_scanned
+    # existed. One carrying a verdict is settled by definition.
+    calls = _spy_fetch(monkeypatch, VERDICT_LINE)
+    cached = {(412, "job-1"): {"failure_class": "infra", "slurm_state": "infra-alloc"}}
+    out = di_collect._verdicts_for_jobs([_job()], cached, 412)
+    assert calls == []
+    assert out["job-1"]["slurm_state"] == "infra-alloc"
+
+
+def test_a_settled_log_with_no_verdict_is_marked_so_it_is_read_only_once(monkeypatch):
+    # 169 of the real records legitimately have no verdict line — canceled
+    # jobs, mostly. Keying the cache on "has a verdict" would re-fetch those
+    # every run forever, which is the trap this marker exists to avoid.
+    calls = _spy_fetch(monkeypatch, "no driver line here")
+    out = di_collect._verdicts_for_jobs([_job()], {}, 412)
+    assert calls == ["job-1"]
+    assert out["job-1"] == {"log_scanned": True}
+
+    second = di_collect._verdicts_for_jobs([_job()], {(412, "job-1"): out["job-1"]}, 412)
+    assert calls == ["job-1"]
+    assert second["job-1"]["log_scanned"] is True
+
+
+def test_a_verdictless_log_from_a_job_that_just_finished_is_read_again(monkeypatch):
+    # Buildkite marks a job terminal when the agent exits, but the driver's
+    # verdict is the last line printed — exactly what a late flush drops.
+    # Marking it settled now would freeze in an answer we read too early.
+    from datetime import datetime, timezone
+    just_now = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    calls = _spy_fetch(monkeypatch, "still flushing")
+    out = di_collect._verdicts_for_jobs([_job(finished_at=just_now)], {}, 412)
+    assert calls == ["job-1"]
+    assert "log_scanned" not in out["job-1"]
+
+
+def test_a_failed_download_is_not_recorded_as_read(monkeypatch):
+    calls = _spy_fetch(monkeypatch, None, scanned=False)
+    out = di_collect._verdicts_for_jobs([_job()], {}, 412)
+    assert calls == ["job-1"]
+    assert out["job-1"] == {}
+
+
+def test_the_cache_never_resurrects_stale_non_verdict_fields(monkeypatch):
+    # The cached record also holds state/runtime/agent from an earlier pass.
+    # Those come from the API fresh each run; letting the cache win would pin
+    # a job to whatever it looked like the first time we saw it.
+    _spy_fetch(monkeypatch, VERDICT_LINE)
+    cached = {(412, "job-1"): {
+        "failure_class": "ok", "log_scanned": True,
+        "state": "running", "runtime_s": 1.0, "agent_name": "old-box",
+    }}
+    fields = di_collect._verdicts_for_jobs([_job()], cached, 412)["job-1"]
+    assert set(fields) <= {*di_collect._VERDICT_KEYS, "log_scanned"}
+
+    record = job_record(BUILD, _job(), fields)
+    assert record["agent_name"] == "mi350-agent-3"
+    assert record["state"] == "passed"
+
+
+def test_an_unfinished_job_is_never_fetched(monkeypatch):
+    calls = _spy_fetch(monkeypatch, VERDICT_LINE)
+    out = di_collect._verdicts_for_jobs([_job(state="running")], {}, 412)
+    assert calls == []
+    assert out["job-1"] == {}
+
+
+def test_the_same_job_id_in_a_different_build_is_a_cache_miss(monkeypatch):
+    calls = _spy_fetch(monkeypatch, VERDICT_LINE)
+    cached = {(999, "job-1"): {"failure_class": "ok", "log_scanned": True}}
+    di_collect._verdicts_for_jobs([_job()], cached, 412)
+    assert calls == ["job-1"]

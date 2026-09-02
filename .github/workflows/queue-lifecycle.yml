@@ -8,6 +8,11 @@ on:
     - cron: '47 * * * *'
   workflow_dispatch:
 
+# Share of the 50 req/min Buildkite allows per authenticated user; see
+# di-collect.yml for the full split.
+env:
+  BUILDKITE_MAX_RPM: '5'
+
 concurrency:
   group: queue-lifecycle-data-publish
   cancel-in-progress: false

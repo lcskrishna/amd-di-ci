@@ -53,6 +53,7 @@ from vllm.ci.perf_eval_webhook import (  # noqa: E402
     read_events,
     utcnow_iso,
 )
+from vllm.ci import ratelimit  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s", datefmt="%H:%M:%S")
 log = logging.getLogger(__name__)
@@ -354,12 +355,14 @@ def event_key(event: dict) -> tuple:
 # ---------------------------------------------------------------------------
 
 def _bk_get(path: str, token: str, params: Optional[dict] = None):
+    ratelimit.acquire()
     resp = requests.get(
         f"{BK_API_BASE}{path}",
         headers={"Authorization": f"Bearer {token}"},
         params=params,
         timeout=30,
     )
+    ratelimit.observe(resp.headers)
     if resp.status_code == 429:
         log.warning("Buildkite rate limited on %s", path)
         return []
@@ -386,6 +389,7 @@ def _bk_download_json(download_url: str, token: str) -> Optional[dict]:
     """Download a JSON artifact. Buildkite redirects to a presigned URL;
     requests drops the auth header on the cross-host hop automatically."""
     try:
+        ratelimit.acquire()
         resp = requests.get(
             download_url,
             headers={"Authorization": f"Bearer {token}"},

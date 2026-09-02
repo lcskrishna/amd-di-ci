@@ -27,6 +27,12 @@ on:
         required: false
         default: 'false'
 
+# Share of the 50 req/min Buildkite allows per authenticated user. This
+# workflow is the heaviest collector, so it takes the largest slice; see
+# di-collect.yml for the full split.
+env:
+  BUILDKITE_MAX_RPM: '20'
+
 concurrency:
   group: gh-pages-deploy
   cancel-in-progress: false

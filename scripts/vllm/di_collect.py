@@ -20,7 +20,8 @@ job-level fallback is the path we want — forcing it makes the outcome
 deterministic (no chance of a stray ``FAILED``-looking line in a 100 MB
 SLURM log inventing test rows) and skips 20 large log downloads per build.
 Logs are still fetched separately, but only to read the driver's verdict
-line.
+line, and only once per job — a terminal job's log never changes, so
+``jobs.jsonl`` doubles as the cache that keeps it from being re-downloaded.
 """
 
 from __future__ import annotations
@@ -35,7 +36,7 @@ from typing import Optional
 
 from .ci import config as cfg
 from .ci.buildkite_client import _paginate, _scrub_pii, fetch_build_detail
-from .ci.log_parser import fetch_job_log, parse_job_results
+from .ci.log_parser import fetch_job_log_result, parse_job_results
 from .ci.models import TestResult
 from .ci.utils import parse_iso
 from .di_labels import parse_label
@@ -247,16 +248,76 @@ def di_jobs(build: dict) -> list[dict]:
     return out
 
 
-def _verdicts_for_jobs(jobs: list[dict], workers: int = 8) -> dict[str, dict]:
-    """Fetch logs in parallel and extract each job's driver verdict."""
+# Fields ``extract_verdict`` produces. Only these are carried forward from a
+# cached record — everything else on it (state, runtime_s, agent) is re-derived
+# from the API each pass and must not be resurrected from disk.
+_VERDICT_KEYS = ("slurm_job_id", "slurm_state", "phase", "reason", "failure_class")
+
+# Buildkite marks a job terminal when the agent exits, but the last log chunks
+# can land afterwards — and the driver's verdict is the final line printed, so
+# it is exactly what a partial flush drops. Don't call a verdict-less log
+# settled until the job has been finished this long.
+_LOG_SETTLE_SECONDS = 900
+
+
+def _already_scanned(cached: Optional[dict]) -> bool:
+    """Has this job's log already been read to a conclusion?
+
+    ``log_scanned`` is the marker going forward. The ``failure_class`` fallback
+    backfills records written before it existed: those with a verdict are
+    settled by definition, and those without get re-read once and then marked.
+    """
+    if not cached:
+        return False
+    return bool(cached.get("log_scanned")) or "failure_class" in cached
+
+
+def _log_has_settled(job: dict) -> bool:
+    finished = parse_iso(job.get("finished_at"))
+    if finished is None:
+        return False
+    age = (datetime.now(timezone.utc) - finished).total_seconds()
+    return age >= _LOG_SETTLE_SECONDS
+
+
+def _verdicts_for_jobs(
+    jobs: list[dict],
+    cached_by_key: Optional[dict[tuple, dict]] = None,
+    build_number: Optional[int] = None,
+    workers: int = 4,
+) -> dict[str, dict]:
+    """Extract each job's driver verdict, downloading only logs we haven't read.
+
+    A terminal job's log never changes, so re-downloading it every three hours
+    is pure waste — and at ~440 jobs per pass it was the whole of this repo's
+    Buildkite traffic. ``scripts/collect_ci.py`` already caches on the same
+    principle.
+    """
+    cached_by_key = cached_by_key or {}
+
     def one(job: dict) -> tuple[str, dict]:
+        job_id = job.get("id", "")
         if job.get("state") not in cfg.TERMINAL_STATES:
-            return job.get("id", ""), {}
+            return job_id, {}
+
+        cached = cached_by_key.get((build_number, job_id))
+        if _already_scanned(cached):
+            fields = {k: cached[k] for k in _VERDICT_KEYS if k in cached}
+            fields["log_scanned"] = True
+            return job_id, fields
+
         try:
-            return job.get("id", ""), extract_verdict(fetch_job_log(job))
+            text, scanned = fetch_job_log_result(job)
         except Exception as exc:  # a missing log must not fail the pass
             log.warning("  verdict fetch failed for %s: %s", job.get("name"), exc)
-            return job.get("id", ""), {}
+            return job_id, {}
+
+        fields = extract_verdict(text)
+        # A log with no verdict is only final once it has stopped growing;
+        # marking it early would freeze in an answer we read too soon.
+        if scanned and (fields or _log_has_settled(job)):
+            fields["log_scanned"] = True
+        return job_id, fields
 
     with ThreadPoolExecutor(max_workers=workers) as pool:
         return {jid: fields for jid, fields in pool.map(one, jobs)}
@@ -363,6 +424,8 @@ def collect(
 
     results_dir = output_dir / "test_results"
     all_records: list[dict] = []
+    # Read once, not per build: the file holds every record ever collected.
+    cached_by_key = {_record_key(r): r for r in load_job_records(output_dir / "jobs.jsonl")}
 
     for build in builds:
         build_num = build.get("number")
@@ -376,7 +439,9 @@ def collect(
             log.info("  Build #%s: no DI steps", build_num)
             continue
 
-        verdicts = _verdicts_for_jobs(jobs) if fetch_logs else {}
+        verdicts = (
+            _verdicts_for_jobs(jobs, cached_by_key, build_num) if fetch_logs else {}
+        )
         records = [job_record(build, j, verdicts.get(j.get("id", ""))) for j in jobs]
         all_records.extend(records)
 

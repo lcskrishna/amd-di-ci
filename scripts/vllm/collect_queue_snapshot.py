@@ -45,6 +45,7 @@ from vllm.constants import (  # noqa: E402
     queue_history_reset_datetime,
 )
 from vllm.ci.utils import classify_workload, parse_iso, percentile, queue_from_rules  # noqa: E402
+from vllm.ci import ratelimit  # noqa: E402
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s", datefmt="%H:%M:%S"
@@ -211,7 +212,9 @@ REST_PAGINATION_SAFETY_CAP = 100
 
 def bk_get(path: str, token: str, params: dict | None = None):
     headers = {"Authorization": f"Bearer {token}"}
+    ratelimit.acquire()
     resp = requests.get(f"{BK_API_BASE}{path}", headers=headers, params=params, timeout=30)
+    ratelimit.observe(resp.headers)
     if resp.status_code == 429:
         raise RuntimeError(f"Buildkite REST API rate limited on {path}")
     resp.raise_for_status()
@@ -254,12 +257,14 @@ def bk_graphql(query: str, token: str, variables: dict | None = None) -> dict:
         "Content-Type": "application/json",
         "Accept": "application/json",
     }
+    ratelimit.acquire()
     resp = requests.post(
         BK_GRAPHQL_URL,
         headers=headers,
         json={"query": query, "variables": variables or {}},
         timeout=30,
     )
+    ratelimit.observe(resp.headers)
     if resp.status_code == 429:
         raise RuntimeError("Buildkite GraphQL rate limited")
     resp.raise_for_status()

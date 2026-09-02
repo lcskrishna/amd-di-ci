@@ -51,6 +51,7 @@ from vllm.ci.utils import (  # noqa: E402
     percentile,
     queue_from_rules,
 )
+from vllm.ci import ratelimit  # noqa: E402
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s", datefmt="%H:%M:%S"
@@ -77,7 +78,9 @@ _STRIP_HW_PREFIX = re.compile(r"^mi\d+[a-zA-Z]?_\d+\s*:\s*", re.IGNORECASE)
 
 def _bk_get(path: str, token: str, params: dict | None = None):
     headers = {"Authorization": f"Bearer {token}"}
+    ratelimit.acquire()
     resp = requests.get(f"{BK_API_BASE}{path}", headers=headers, params=params, timeout=30)
+    ratelimit.observe(resp.headers)
     if resp.status_code == 429:
         log.warning("Rate limited")
         return []

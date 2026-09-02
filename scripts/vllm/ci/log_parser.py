@@ -16,6 +16,7 @@ from typing import Optional
 import requests
 
 from . import config as cfg
+from . import ratelimit
 from .models import TestResult
 
 log = logging.getLogger(__name__)
@@ -102,8 +103,13 @@ def _get_session() -> requests.Session:
     return _session
 
 
-def fetch_job_log(job: dict) -> Optional[str]:
-    """Download the raw log for a Buildkite job.
+def fetch_job_log_result(job: dict) -> tuple[Optional[str], bool]:
+    """Download a job's raw log, reporting whether the log was actually read.
+
+    Returns ``(text, scanned)``. A ``None`` text has four causes — no log URL,
+    no token, retries exhausted, or an empty body — and only the last of those
+    means we saw the log and it held nothing. Callers that cache "already
+    looked at this" need to tell those apart, hence the second value.
 
     The Buildkite API returns JSON by default with the log in the "content"
     field. We request text/plain for the raw log, falling back to extracting
@@ -111,19 +117,21 @@ def fetch_job_log(job: dict) -> Optional[str]:
     """
     log_url = job.get("raw_log_url")
     if not log_url:
-        return None
+        return None, False
 
     if not cfg.BK_TOKEN:
-        return None
+        return None, False
 
     session = _get_session()
     for attempt in range(1, 4):
         try:
+            ratelimit.acquire()
             resp = session.get(
                 log_url,
                 timeout=60,
                 headers={"Accept": "text/plain"},
             )
+            ratelimit.observe(resp.headers)
             if resp.status_code == 429:
                 import time
                 wait = int(resp.headers.get("Retry-After", 5 * attempt))
@@ -141,15 +149,20 @@ def fetch_job_log(job: dict) -> Optional[str]:
                         text = data["content"]
                 except Exception:
                     pass
-            return text
+            return text, True
         except Exception as e:
             if attempt < 3:
                 import time
                 time.sleep(2 * attempt)
                 continue
             log.warning("Failed to fetch log for job %s: %s", job.get("name"), e)
-            return None
-    return None
+            return None, False
+    return None, False
+
+
+def fetch_job_log(job: dict) -> Optional[str]:
+    """Download the raw log for a Buildkite job."""
+    return fetch_job_log_result(job)[0]
 
 
 def parse_pytest_log(

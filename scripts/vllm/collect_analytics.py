@@ -46,6 +46,7 @@ from vllm.ci.reliability_history import (  # noqa: E402
     validate_all_main_reliability,
 )
 from vllm.pipelines import NIGHTLY_NAME_PATTERNS_BY_SLUG  # noqa: E402
+from vllm.ci import ratelimit  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s", datefmt="%H:%M:%S")
 log = logging.getLogger(__name__)
@@ -190,12 +191,14 @@ def bk_get(path, token, params=None):
     p = dict(params or {})
     for attempt in range(BK_GET_MAX_ATTEMPTS):
         try:
+            ratelimit.acquire()
             resp = requests.get(
                 url,
                 headers=headers,
                 params=p,
                 timeout=_request_timeout(attempt),
             )
+            ratelimit.observe(resp.headers)
         except (
             requests.exceptions.Timeout,
             requests.exceptions.ConnectionError,

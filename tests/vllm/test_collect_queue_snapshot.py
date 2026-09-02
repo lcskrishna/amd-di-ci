@@ -69,6 +69,7 @@ class TestRestApiResilience:
     def test_rate_limit_raises_instead_of_looking_like_an_empty_page(self, monkeypatch):
         class RateLimitedResponse:
             status_code = 429
+            headers: dict = {}
 
         monkeypatch.setattr(cqs.requests, "get", lambda *args, **kwargs: RateLimitedResponse())
 

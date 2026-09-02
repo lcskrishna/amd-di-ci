@@ -14,6 +14,7 @@ from typing import Optional
 import requests
 
 from . import config as cfg
+from . import ratelimit
 
 log = logging.getLogger(__name__)
 
@@ -32,7 +33,9 @@ def _request(url: str, params: Optional[dict] = None) -> requests.Response:
     headers = _headers()
     for attempt in range(1, cfg.MAX_RETRIES + 1):
         try:
+            ratelimit.acquire()
             resp = requests.get(url, headers=headers, params=params, timeout=30)
+            ratelimit.observe(resp.headers)
             if resp.status_code == 429:
                 # Rate limited — use Retry-After header or exponential backoff
                 retry_after = int(resp.headers.get("Retry-After", cfg.RETRY_BACKOFF * attempt))
@@ -211,12 +214,14 @@ def create_build(
     }
     if author_name or author_email:
         body["author"] = {k: v for k, v in (("name", author_name), ("email", author_email)) if v}
+    ratelimit.acquire()
     resp = requests.post(
         url,
         headers={**_headers(), "Content-Type": "application/json"},
         data=json.dumps(body),
         timeout=30,
     )
+    ratelimit.observe(resp.headers)
     if resp.status_code not in (200, 201):
         raise RuntimeError(f"Buildkite create build failed: {resp.status_code} {resp.text[:400]}")
     return resp.json()

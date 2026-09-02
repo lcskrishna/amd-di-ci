@@ -43,6 +43,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from vllm.constants import BK_API_BASE, BK_ORG  # noqa: E402
 from vllm.ci.utils import parse_iso, queue_from_rules  # noqa: E402
+from vllm.ci import ratelimit  # noqa: E402
 
 
 ROOT = Path(__file__).resolve().parent.parent.parent
@@ -231,12 +232,14 @@ def _request_build_page(
     response = None
     for attempt in range(1, REQUEST_ATTEMPTS + 1):
         try:
+            ratelimit.acquire()
             response = requests.get(
                 f"{BK_API_BASE}{path}",
                 headers={"Authorization": f"Bearer {token}"},
                 params=params,
                 timeout=90,
             )
+            ratelimit.observe(response.headers)
             if response.status_code not in RETRYABLE_STATUS_CODES:
                 response.raise_for_status()
                 break

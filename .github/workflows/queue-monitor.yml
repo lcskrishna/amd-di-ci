@@ -9,6 +9,12 @@ on:
     types: [buildkite_queue_changed]
   workflow_dispatch:
 
+# Share of the 50 req/min Buildkite allows per authenticated user; see
+# di-collect.yml for the full split. This one polls six times an hour, so it
+# will regularly overlap the heavier collectors.
+env:
+  BUILDKITE_MAX_RPM: '8'
+
 concurrency:
   # Queue evidence has a dedicated branch, so it can keep polling while the
   # much larger dashboard workflow holds the gh-pages deployment lock.
