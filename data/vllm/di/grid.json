@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-07T23:37:00Z",
+  "generated_at": "2026-09-08T04:52:08Z",
   "pipeline": {
     "slug": "amd-distributed-inference-ci",
     "name_pattern": ".*",
@@ -67,7 +67,7 @@
     {
       "build_number": 67,
       "build_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/67",
-      "state": "failing",
+      "state": "failed",
       "branch": "lcskrishna:vllm:csrikris-intranode-di-ci",
       "commit": "e114a6e23856",
       "created_at": "2026-09-07T19:00:01.038Z"
@@ -823,30 +823,30 @@
           ]
         },
         "MiniMax-M3-MXFP8": {
-          "passed": 0,
-          "completed": 4,
+          "passed": 2,
+          "completed": 6,
           "runs": [
             {
               "shape": "1P1D",
               "router": "proxy",
               "mode": "EP8/DP8-WideEP",
-              "verdict": "running",
-              "runtime_s": null,
+              "verdict": "passed",
+              "runtime_s": 5673.2,
               "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/67#01a07d3d-e663-4310-90aa-ad27b1fc9802",
-              "failure_class": "",
-              "slurm_state": "",
-              "reason": ""
+              "failure_class": "ok",
+              "slurm_state": "COMPLETED",
+              "reason": "gate"
             },
             {
               "shape": "1P1D",
               "router": "vllm-router",
               "mode": "EP8/DP8-WideEP",
-              "verdict": "running",
-              "runtime_s": null,
+              "verdict": "passed",
+              "runtime_s": 5704.4,
               "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/67#01a07d3d-e663-4779-9c4c-f9e3664ef7e0",
-              "failure_class": "",
-              "slurm_state": "",
-              "reason": ""
+              "failure_class": "ok",
+              "slurm_state": "COMPLETED",
+              "reason": "sentinel"
             },
             {
               "shape": "1P1D",
@@ -20893,16 +20893,16 @@
         {
           "build_number": 67,
           "date": "2026-09-07",
-          "verdict": "running",
-          "state": "running",
-          "runtime_s": null,
+          "verdict": "passed",
+          "state": "passed",
+          "runtime_s": 5673.2,
           "queue_wait_s": 0.5,
           "agent_name": "spur-login-atl-5",
           "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/67#01a07d3d-e663-4310-90aa-ad27b1fc9802",
-          "phase": "",
-          "slurm_state": "",
-          "failure_class": "",
-          "reason": ""
+          "phase": "workload",
+          "slurm_state": "COMPLETED",
+          "failure_class": "ok",
+          "reason": "gate"
         },
         {
           "build_number": 66,
@@ -21032,15 +21032,15 @@
         }
       ],
       "attempts": 21,
-      "completed": 20,
-      "passed": 9,
+      "completed": 21,
+      "passed": 10,
       "failed": 11,
-      "pass_rate": 0.45,
+      "pass_rate": 0.4762,
       "rate_is_reportable": true,
-      "flips": 3,
-      "last_verdict": "failed",
-      "last_build": 66,
-      "median_runtime_s": 2682.8,
+      "flips": 4,
+      "last_verdict": "passed",
+      "last_build": 67,
+      "median_runtime_s": 2721.7,
       "median_queue_wait_s": 0.4
     },
     {
@@ -21055,16 +21055,16 @@
         {
           "build_number": 67,
           "date": "2026-09-07",
-          "verdict": "running",
-          "state": "running",
-          "runtime_s": null,
+          "verdict": "passed",
+          "state": "passed",
+          "runtime_s": 5704.4,
           "queue_wait_s": 0.5,
           "agent_name": "spur-login-atl-3",
           "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/67#01a07d3d-e663-4779-9c4c-f9e3664ef7e0",
-          "phase": "",
-          "slurm_state": "",
-          "failure_class": "",
-          "reason": ""
+          "phase": "workload",
+          "slurm_state": "COMPLETED",
+          "failure_class": "ok",
+          "reason": "sentinel"
         },
         {
           "build_number": 66,
@@ -21194,15 +21194,15 @@
         }
       ],
       "attempts": 21,
-      "completed": 20,
-      "passed": 7,
+      "completed": 21,
+      "passed": 8,
       "failed": 13,
-      "pass_rate": 0.35,
+      "pass_rate": 0.381,
       "rate_is_reportable": true,
-      "flips": 5,
-      "last_verdict": "failed",
-      "last_build": 66,
-      "median_runtime_s": 2524.6,
+      "flips": 6,
+      "last_verdict": "passed",
+      "last_build": 67,
+      "median_runtime_s": 2592.2,
       "median_queue_wait_s": 0.4
     },
     {
@@ -21474,9 +21474,9 @@
   "agents": [
     {
       "agent_name": "spur-login-atl-3",
-      "completed": 311,
+      "completed": 312,
       "failed": 217,
-      "failure_rate": 0.6977
+      "failure_rate": 0.6955
     },
     {
       "agent_name": "spur-login-atl-2",
@@ -21498,9 +21498,9 @@
     },
     {
       "agent_name": "spur-login-atl-5",
-      "completed": 231,
+      "completed": 232,
       "failed": 123,
-      "failure_rate": 0.5325
+      "failure_rate": 0.5302
     }
   ],
   "failure_classes": {
