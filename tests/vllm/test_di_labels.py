@@ -18,8 +18,8 @@ LIVE_LABELS = [
 WIDE_EP_LABEL = "DeepSeek-V3-PD-1P1D-EP8/DP8-WideEP-MoRIIO-proxy"
 
 
-def test_grid_is_twenty_cells():
-    assert len(LIVE_LABELS) == 20
+def test_grid_is_twenty_four_cells():
+    assert len(LIVE_LABELS) == 24
 
 
 @pytest.mark.parametrize("label", LIVE_LABELS)
@@ -36,7 +36,7 @@ def test_live_label_fields(label):
 
 
 def test_cell_ids_are_distinct():
-    assert len({parse_label(l).cell_id for l in LIVE_LABELS}) == 20
+    assert len({parse_label(l).cell_id for l in LIVE_LABELS}) == 24
 
 
 def test_hyphenated_model_and_router_are_not_split():

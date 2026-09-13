@@ -60,6 +60,7 @@ MODELS = (
     "Kimi-K2.5-MXFP4",
     "Kimi-K2.6-MXFP4",
     "MiniMax-M3-MXFP8",
+    "GLM-5.2-FP8",
 )
 SHAPES = ("1P1D", "2P2D")
 ROUTERS = ("proxy", "vllm-router")

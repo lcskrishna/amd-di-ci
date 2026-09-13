@@ -51,7 +51,7 @@ def cell_by_id(grid, cell_id):
 
 def test_every_grid_is_enumerated_in_full():
     cells = expected_cells()
-    assert Counter(c["grid"] for c in cells) == {"tp8": 20, "wide-ep": 20}
+    assert Counter(c["grid"] for c in cells) == {"tp8": 24, "wide-ep": 24}
 
 
 def test_expert_parallelism_scales_with_node_count():
@@ -81,7 +81,7 @@ def test_a_real_wide_ep_2p2d_label_would_land_in_its_enumerated_cell():
 
 def test_cells_that_never_ran_are_rendered_not_omitted():
     grid = build_grid([])
-    assert len(grid["cells"]) == 40
+    assert len(grid["cells"]) == 48
     assert all(c["last_verdict"] == "never_run" for c in grid["cells"])
     assert cell_by_id(grid, CELL_ID)["pass_rate"] is None
 
