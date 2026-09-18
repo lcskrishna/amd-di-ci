@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-18T16:34:17Z",
+  "generated_at": "2026-09-18T21:00:55Z",
   "pipeline": {
     "slug": "amd-distributed-inference-ci",
     "name_pattern": ".*",
@@ -65,6 +65,14 @@
   "step_timeout_mins": 120,
   "min_samples_for_rate": 5,
   "builds": [
+    {
+      "build_number": 78,
+      "build_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78",
+      "state": "failing",
+      "branch": "lcskrishna:vllm:ainic-userspace-swap",
+      "commit": "5125bc91895c",
+      "created_at": "2026-09-18T19:00:00.491Z"
+    },
     {
       "build_number": 77,
       "build_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/77",
@@ -611,6 +619,422 @@
     }
   ],
   "build_rollup": [
+    {
+      "build_number": 78,
+      "date": "2026-09-18",
+      "models": {
+        "DeepSeek-R1-MXFP4": {
+          "passed": 0,
+          "completed": 3,
+          "runs": [
+            {
+              "shape": "1P1D",
+              "router": "proxy",
+              "mode": "EP8/DP8-WideEP",
+              "verdict": "waiting",
+              "runtime_s": null,
+              "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbc1-4bd1-9a10-802ce78ac104",
+              "failure_class": "",
+              "slurm_state": "",
+              "reason": ""
+            },
+            {
+              "shape": "1P1D",
+              "router": "vllm-router",
+              "mode": "EP8/DP8-WideEP",
+              "verdict": "waiting",
+              "runtime_s": null,
+              "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbc1-45e1-bb03-bece6a29832f",
+              "failure_class": "",
+              "slurm_state": "",
+              "reason": ""
+            },
+            {
+              "shape": "1P1D",
+              "router": "proxy",
+              "mode": "TP8",
+              "verdict": "failed",
+              "runtime_s": 1804.8,
+              "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbbc-43fd-8cef-4646fe4e4e38",
+              "failure_class": "infra",
+              "slurm_state": "infra-stuck-PENDING",
+              "reason": "queued > 1800s"
+            },
+            {
+              "shape": "1P1D",
+              "router": "vllm-router",
+              "mode": "TP8",
+              "verdict": "failed",
+              "runtime_s": 1804.8,
+              "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbbc-47f4-856d-6516142ee3ee",
+              "failure_class": "infra",
+              "slurm_state": "infra-stuck-PENDING",
+              "reason": "queued > 1800s"
+            },
+            {
+              "shape": "2P2D",
+              "router": "proxy",
+              "mode": "TP8",
+              "verdict": "failed",
+              "runtime_s": 2829.0,
+              "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbbf-462d-8238-35e255ab7234",
+              "failure_class": "workload",
+              "slurm_state": "FAILED",
+              "reason": "sentinel"
+            },
+            {
+              "shape": "2P2D",
+              "router": "vllm-router",
+              "mode": "TP8",
+              "verdict": "running",
+              "runtime_s": null,
+              "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbbf-4c41-8c03-2c60bca05433",
+              "failure_class": "",
+              "slurm_state": "",
+              "reason": ""
+            }
+          ]
+        },
+        "DeepSeek-V3": {
+          "passed": 0,
+          "completed": 4,
+          "runs": [
+            {
+              "shape": "1P1D",
+              "router": "proxy",
+              "mode": "EP8/DP8-WideEP",
+              "verdict": "waiting",
+              "runtime_s": null,
+              "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbc0-4c05-9348-b2fdd38d8093",
+              "failure_class": "",
+              "slurm_state": "",
+              "reason": ""
+            },
+            {
+              "shape": "1P1D",
+              "router": "vllm-router",
+              "mode": "EP8/DP8-WideEP",
+              "verdict": "waiting",
+              "runtime_s": null,
+              "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbc1-4ca4-b9c0-bc2dc7ec1fc5",
+              "failure_class": "",
+              "slurm_state": "",
+              "reason": ""
+            },
+            {
+              "shape": "1P1D",
+              "router": "proxy",
+              "mode": "TP8",
+              "verdict": "failed",
+              "runtime_s": 1805.9,
+              "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbb7-4522-bc1c-5cfbb88531dd",
+              "failure_class": "infra",
+              "slurm_state": "infra-stuck-PENDING",
+              "reason": "queued > 1800s"
+            },
+            {
+              "shape": "1P1D",
+              "router": "vllm-router",
+              "mode": "TP8",
+              "verdict": "failed",
+              "runtime_s": 1805.9,
+              "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbbb-4259-850e-981ee86c0818",
+              "failure_class": "infra",
+              "slurm_state": "infra-stuck-PENDING",
+              "reason": "queued > 1800s"
+            },
+            {
+              "shape": "2P2D",
+              "router": "proxy",
+              "mode": "TP8",
+              "verdict": "failed",
+              "runtime_s": 3813.7,
+              "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbbe-4dff-b1d6-e0eec56e31cc",
+              "failure_class": "workload",
+              "slurm_state": "FAILED",
+              "reason": "gate"
+            },
+            {
+              "shape": "2P2D",
+              "router": "vllm-router",
+              "mode": "TP8",
+              "verdict": "failed",
+              "runtime_s": 4413.3,
+              "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbbe-40f4-9cc5-7e023e2f8a6c",
+              "failure_class": "workload",
+              "slurm_state": "workload-failed",
+              "reason": "scontrol JobState=FAILED phase=workload"
+            }
+          ]
+        },
+        "GLM-5.2-FP8": {
+          "passed": 0,
+          "completed": 0,
+          "runs": [
+            {
+              "shape": "1P1D",
+              "router": "proxy",
+              "mode": "EP8/DP8-WideEP",
+              "verdict": "waiting",
+              "runtime_s": null,
+              "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbc3-453c-872c-d11f2c52e642",
+              "failure_class": "",
+              "slurm_state": "",
+              "reason": ""
+            },
+            {
+              "shape": "1P1D",
+              "router": "vllm-router",
+              "mode": "EP8/DP8-WideEP",
+              "verdict": "waiting",
+              "runtime_s": null,
+              "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbc3-4268-b8f6-bbafe57731dd",
+              "failure_class": "",
+              "slurm_state": "",
+              "reason": ""
+            },
+            {
+              "shape": "1P1D",
+              "router": "proxy",
+              "mode": "TP8",
+              "verdict": "waiting",
+              "runtime_s": null,
+              "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbbe-4c4d-99ee-662c1319d995",
+              "failure_class": "",
+              "slurm_state": "",
+              "reason": ""
+            },
+            {
+              "shape": "1P1D",
+              "router": "vllm-router",
+              "mode": "TP8",
+              "verdict": "waiting",
+              "runtime_s": null,
+              "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbbe-4f21-aca3-a98f0368482c",
+              "failure_class": "",
+              "slurm_state": "",
+              "reason": ""
+            }
+          ]
+        },
+        "Kimi-K2.5-MXFP4": {
+          "passed": 0,
+          "completed": 2,
+          "runs": [
+            {
+              "shape": "1P1D",
+              "router": "proxy",
+              "mode": "EP8/DP8-WideEP",
+              "verdict": "waiting",
+              "runtime_s": null,
+              "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbc1-44bb-8082-bd729fcd9b60",
+              "failure_class": "",
+              "slurm_state": "",
+              "reason": ""
+            },
+            {
+              "shape": "1P1D",
+              "router": "vllm-router",
+              "mode": "EP8/DP8-WideEP",
+              "verdict": "waiting",
+              "runtime_s": null,
+              "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbc2-4014-8f7c-605f1a969967",
+              "failure_class": "",
+              "slurm_state": "",
+              "reason": ""
+            },
+            {
+              "shape": "1P1D",
+              "router": "proxy",
+              "mode": "TP8",
+              "verdict": "failed",
+              "runtime_s": 1967.2,
+              "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbbc-4199-b8e9-e0b52324cdf7",
+              "failure_class": "workload",
+              "slurm_state": "FAILED",
+              "reason": "gate"
+            },
+            {
+              "shape": "1P1D",
+              "router": "vllm-router",
+              "mode": "TP8",
+              "verdict": "failed",
+              "runtime_s": 823.8,
+              "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbbc-48bb-aef7-05a9fe66c70c",
+              "failure_class": "workload",
+              "slurm_state": "FAILED",
+              "reason": "gate"
+            },
+            {
+              "shape": "2P2D",
+              "router": "proxy",
+              "mode": "TP8",
+              "verdict": "running",
+              "runtime_s": null,
+              "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbbf-4839-a4e9-1067a27b291d",
+              "failure_class": "",
+              "slurm_state": "",
+              "reason": ""
+            },
+            {
+              "shape": "2P2D",
+              "router": "vllm-router",
+              "mode": "TP8",
+              "verdict": "waiting",
+              "runtime_s": null,
+              "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbbf-4257-aac5-2aa3d0510e2e",
+              "failure_class": "",
+              "slurm_state": "",
+              "reason": ""
+            }
+          ]
+        },
+        "Kimi-K2.6-MXFP4": {
+          "passed": 0,
+          "completed": 0,
+          "runs": [
+            {
+              "shape": "1P1D",
+              "router": "proxy",
+              "mode": "EP8/DP8-WideEP",
+              "verdict": "waiting",
+              "runtime_s": null,
+              "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbc2-4ffb-a5af-478294763f40",
+              "failure_class": "",
+              "slurm_state": "",
+              "reason": ""
+            },
+            {
+              "shape": "1P1D",
+              "router": "vllm-router",
+              "mode": "EP8/DP8-WideEP",
+              "verdict": "waiting",
+              "runtime_s": null,
+              "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbc2-4209-a555-32cf0e678ab2",
+              "failure_class": "",
+              "slurm_state": "",
+              "reason": ""
+            },
+            {
+              "shape": "1P1D",
+              "router": "proxy",
+              "mode": "TP8",
+              "verdict": "running",
+              "runtime_s": null,
+              "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbbd-4a73-9b0d-fade6a596051",
+              "failure_class": "",
+              "slurm_state": "",
+              "reason": ""
+            },
+            {
+              "shape": "1P1D",
+              "router": "vllm-router",
+              "mode": "TP8",
+              "verdict": "running",
+              "runtime_s": null,
+              "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbbd-4b0f-a351-8b6494abedea",
+              "failure_class": "",
+              "slurm_state": "",
+              "reason": ""
+            },
+            {
+              "shape": "2P2D",
+              "router": "proxy",
+              "mode": "TP8",
+              "verdict": "waiting",
+              "runtime_s": null,
+              "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbc0-4067-badf-deb9caa23f70",
+              "failure_class": "",
+              "slurm_state": "",
+              "reason": ""
+            },
+            {
+              "shape": "2P2D",
+              "router": "vllm-router",
+              "mode": "TP8",
+              "verdict": "waiting",
+              "runtime_s": null,
+              "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbc0-4628-b2ab-5822c814cee7",
+              "failure_class": "",
+              "slurm_state": "",
+              "reason": ""
+            }
+          ]
+        },
+        "MiniMax-M3-MXFP8": {
+          "passed": 0,
+          "completed": 0,
+          "runs": [
+            {
+              "shape": "1P1D",
+              "router": "proxy",
+              "mode": "EP8/DP8-WideEP",
+              "verdict": "waiting",
+              "runtime_s": null,
+              "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbc2-422c-9063-100330118dea",
+              "failure_class": "",
+              "slurm_state": "",
+              "reason": ""
+            },
+            {
+              "shape": "1P1D",
+              "router": "vllm-router",
+              "mode": "EP8/DP8-WideEP",
+              "verdict": "waiting",
+              "runtime_s": null,
+              "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbc2-4e92-a2f2-8d2a75e4df6a",
+              "failure_class": "",
+              "slurm_state": "",
+              "reason": ""
+            },
+            {
+              "shape": "1P1D",
+              "router": "proxy",
+              "mode": "TP8",
+              "verdict": "waiting",
+              "runtime_s": null,
+              "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbbd-40bc-b8ca-d79b820b312d",
+              "failure_class": "",
+              "slurm_state": "",
+              "reason": ""
+            },
+            {
+              "shape": "1P1D",
+              "router": "vllm-router",
+              "mode": "TP8",
+              "verdict": "waiting",
+              "runtime_s": null,
+              "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbbd-4d7c-8ad0-d4e8a59e8735",
+              "failure_class": "",
+              "slurm_state": "",
+              "reason": ""
+            },
+            {
+              "shape": "2P2D",
+              "router": "proxy",
+              "mode": "TP8",
+              "verdict": "waiting",
+              "runtime_s": null,
+              "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbc0-467a-8d8a-11226c427664",
+              "failure_class": "",
+              "slurm_state": "",
+              "reason": ""
+            },
+            {
+              "shape": "2P2D",
+              "router": "vllm-router",
+              "mode": "TP8",
+              "verdict": "waiting",
+              "runtime_s": null,
+              "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbc0-42c6-b563-709a955004fc",
+              "failure_class": "",
+              "slurm_state": "",
+              "reason": ""
+            }
+          ]
+        }
+      }
+    },
     {
       "build_number": 77,
       "date": "2026-09-17",
@@ -20328,6 +20752,20 @@
       "router": "proxy",
       "history": [
         {
+          "build_number": 78,
+          "date": "2026-09-18",
+          "verdict": "failed",
+          "state": "failed",
+          "runtime_s": 1805.9,
+          "queue_wait_s": 0.5,
+          "agent_name": "spur-login-atl-3",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbb7-4522-bc1c-5cfbb88531dd",
+          "phase": "submitted",
+          "slurm_state": "infra-stuck-PENDING",
+          "failure_class": "infra",
+          "reason": "queued > 1800s"
+        },
+        {
           "build_number": 77,
           "date": "2026-09-17",
           "verdict": "passed",
@@ -20452,32 +20890,18 @@
           "slurm_state": "workload-timeout",
           "failure_class": "workload",
           "reason": "no verdict within 7200s"
-        },
-        {
-          "build_number": 68,
-          "date": "2026-09-08",
-          "verdict": "failed",
-          "state": "failed",
-          "runtime_s": 363.1,
-          "queue_wait_s": 0.6,
-          "agent_name": "spur-login-atl-2",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/68#01a08264-4174-41bd-8ee1-e21395d859f4",
-          "phase": "bringup",
-          "slurm_state": "infra-NODE_FAIL",
-          "failure_class": "infra",
-          "reason": "scontrol Reason=NodeDown"
         }
       ],
-      "attempts": 59,
-      "completed": 57,
+      "attempts": 60,
+      "completed": 58,
       "passed": 39,
-      "failed": 18,
-      "pass_rate": 0.6842,
+      "failed": 19,
+      "pass_rate": 0.6724,
       "rate_is_reportable": true,
-      "flips": 16,
-      "last_verdict": "passed",
-      "last_build": 77,
-      "median_runtime_s": 2357.4,
+      "flips": 17,
+      "last_verdict": "failed",
+      "last_build": 78,
+      "median_runtime_s": 2251.5,
       "median_queue_wait_s": 0.5
     },
     {
@@ -20489,6 +20913,20 @@
       "transport": "MoRIIO",
       "router": "vllm-router",
       "history": [
+        {
+          "build_number": 78,
+          "date": "2026-09-18",
+          "verdict": "failed",
+          "state": "failed",
+          "runtime_s": 1805.9,
+          "queue_wait_s": 0.5,
+          "agent_name": "spur-login-atl-1",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbbb-4259-850e-981ee86c0818",
+          "phase": "submitted",
+          "slurm_state": "infra-stuck-PENDING",
+          "failure_class": "infra",
+          "reason": "queued > 1800s"
+        },
         {
           "build_number": 77,
           "date": "2026-09-17",
@@ -20614,32 +21052,18 @@
           "slurm_state": "COMPLETED",
           "failure_class": "ok",
           "reason": "sentinel"
-        },
-        {
-          "build_number": 68,
-          "date": "2026-09-08",
-          "verdict": "failed",
-          "state": "failed",
-          "runtime_s": 1805.5,
-          "queue_wait_s": 0.7,
-          "agent_name": "spur-login-atl-1",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/68#01a08264-4177-4de5-b074-8a4c1b2ad784",
-          "phase": "submitted",
-          "slurm_state": "infra-stuck-PENDING",
-          "failure_class": "infra",
-          "reason": "queued > 1800s"
         }
       ],
-      "attempts": 62,
-      "completed": 58,
+      "attempts": 63,
+      "completed": 59,
       "passed": 38,
-      "failed": 20,
-      "pass_rate": 0.6552,
+      "failed": 21,
+      "pass_rate": 0.6441,
       "rate_is_reportable": true,
       "flips": 21,
       "last_verdict": "failed",
-      "last_build": 77,
-      "median_runtime_s": 2150.1,
+      "last_build": 78,
+      "median_runtime_s": 2090.3,
       "median_queue_wait_s": 0.5
     },
     {
@@ -20651,6 +21075,20 @@
       "transport": "MoRIIO",
       "router": "proxy",
       "history": [
+        {
+          "build_number": 78,
+          "date": "2026-09-18",
+          "verdict": "failed",
+          "state": "failed",
+          "runtime_s": 3813.7,
+          "queue_wait_s": 0.5,
+          "agent_name": "spur-login-atl-2",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbbe-4dff-b1d6-e0eec56e31cc",
+          "phase": "bringup",
+          "slurm_state": "FAILED",
+          "failure_class": "workload",
+          "reason": "gate"
+        },
         {
           "build_number": 77,
           "date": "2026-09-17",
@@ -20776,32 +21214,18 @@
           "slurm_state": "server-failed",
           "failure_class": "bringup",
           "reason": "scontrol JobState=FAILED phase=bringup"
-        },
-        {
-          "build_number": 68,
-          "date": "2026-09-08",
-          "verdict": "passed",
-          "state": "passed",
-          "runtime_s": 2896.8,
-          "queue_wait_s": 0.5,
-          "agent_name": "spur-login-atl-5",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/68#01a08264-417a-4d9b-9308-bec3c376fa15",
-          "phase": "workload",
-          "slurm_state": "COMPLETED",
-          "failure_class": "ok",
-          "reason": "gate"
         }
       ],
-      "attempts": 62,
-      "completed": 58,
+      "attempts": 63,
+      "completed": 59,
       "passed": 28,
-      "failed": 30,
-      "pass_rate": 0.4828,
+      "failed": 31,
+      "pass_rate": 0.4746,
       "rate_is_reportable": true,
       "flips": 28,
       "last_verdict": "failed",
-      "last_build": 77,
-      "median_runtime_s": 2279.0,
+      "last_build": 78,
+      "median_runtime_s": 2330.2,
       "median_queue_wait_s": 0.5
     },
     {
@@ -20813,6 +21237,20 @@
       "transport": "MoRIIO",
       "router": "vllm-router",
       "history": [
+        {
+          "build_number": 78,
+          "date": "2026-09-18",
+          "verdict": "failed",
+          "state": "failed",
+          "runtime_s": 4413.3,
+          "queue_wait_s": 0.6,
+          "agent_name": "spur-login-atl-4",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbbe-40f4-9cc5-7e023e2f8a6c",
+          "phase": "workload",
+          "slurm_state": "workload-failed",
+          "failure_class": "workload",
+          "reason": "scontrol JobState=FAILED phase=workload"
+        },
         {
           "build_number": 77,
           "date": "2026-09-17",
@@ -20938,32 +21376,18 @@
           "slurm_state": "preflight-rejected",
           "failure_class": "infra",
           "reason": "rank 0 on ml-ai-ubuntu-gpu-mi350x8-2304gb-fabric-9: 8/8 GPUs hold VRAM above 10%; ports already bound: 36367 30000 29000"
-        },
-        {
-          "build_number": 68,
-          "date": "2026-09-08",
-          "verdict": "failed",
-          "state": "failed",
-          "runtime_s": 3534.5,
-          "queue_wait_s": 0.5,
-          "agent_name": "spur-login-atl-4",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/68#01a08264-417a-4f31-8c2f-0b3faa9c209c",
-          "phase": "workload",
-          "slurm_state": "workload-failed",
-          "failure_class": "workload",
-          "reason": "scontrol JobState=FAILED phase=workload"
         }
       ],
-      "attempts": 62,
-      "completed": 59,
+      "attempts": 63,
+      "completed": 60,
       "passed": 18,
-      "failed": 41,
-      "pass_rate": 0.3051,
+      "failed": 42,
+      "pass_rate": 0.3,
       "rate_is_reportable": true,
       "flips": 23,
       "last_verdict": "failed",
-      "last_build": 77,
-      "median_runtime_s": 3043.3,
+      "last_build": 78,
+      "median_runtime_s": 3130.7,
       "median_queue_wait_s": 0.5
     },
     {
@@ -20975,6 +21399,20 @@
       "transport": "MoRIIO",
       "router": "proxy",
       "history": [
+        {
+          "build_number": 78,
+          "date": "2026-09-18",
+          "verdict": "failed",
+          "state": "failed",
+          "runtime_s": 1804.8,
+          "queue_wait_s": 0.4,
+          "agent_name": "spur-login-atl-1",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbbc-43fd-8cef-4646fe4e4e38",
+          "phase": "submitted",
+          "slurm_state": "infra-stuck-PENDING",
+          "failure_class": "infra",
+          "reason": "queued > 1800s"
+        },
         {
           "build_number": 77,
           "date": "2026-09-17",
@@ -21100,32 +21538,18 @@
           "slurm_state": "workload-timeout",
           "failure_class": "workload",
           "reason": "no verdict within 7200s"
-        },
-        {
-          "build_number": 68,
-          "date": "2026-09-08",
-          "verdict": "failed",
-          "state": "failed",
-          "runtime_s": 1784.7,
-          "queue_wait_s": 0.4,
-          "agent_name": "spur-login-atl-2",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/68#01a08264-4178-444d-9ffd-97334d6dabe8",
-          "phase": "bringup",
-          "slurm_state": "infra-NODE_FAIL",
-          "failure_class": "infra",
-          "reason": "scontrol Reason=NodeDown"
         }
       ],
-      "attempts": 59,
-      "completed": 56,
+      "attempts": 60,
+      "completed": 57,
       "passed": 34,
-      "failed": 22,
-      "pass_rate": 0.6071,
+      "failed": 23,
+      "pass_rate": 0.5965,
       "rate_is_reportable": true,
-      "flips": 20,
-      "last_verdict": "passed",
-      "last_build": 77,
-      "median_runtime_s": 1037.2,
+      "flips": 21,
+      "last_verdict": "failed",
+      "last_build": 78,
+      "median_runtime_s": 1056.3,
       "median_queue_wait_s": 0.4
     },
     {
@@ -21137,6 +21561,20 @@
       "transport": "MoRIIO",
       "router": "vllm-router",
       "history": [
+        {
+          "build_number": 78,
+          "date": "2026-09-18",
+          "verdict": "failed",
+          "state": "failed",
+          "runtime_s": 1804.8,
+          "queue_wait_s": 0.4,
+          "agent_name": "spur-login-atl-3",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbbc-47f4-856d-6516142ee3ee",
+          "phase": "submitted",
+          "slurm_state": "infra-stuck-PENDING",
+          "failure_class": "infra",
+          "reason": "queued > 1800s"
+        },
         {
           "build_number": 77,
           "date": "2026-09-17",
@@ -21262,32 +21700,18 @@
           "slurm_state": "COMPLETED",
           "failure_class": "ok",
           "reason": "sentinel"
-        },
-        {
-          "build_number": 68,
-          "date": "2026-09-08",
-          "verdict": "passed",
-          "state": "passed",
-          "runtime_s": 2305.9,
-          "queue_wait_s": 0.4,
-          "agent_name": "spur-login-atl-1",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/68#01a08264-4178-49ec-a53a-565ce00afcf7",
-          "phase": "workload",
-          "slurm_state": "COMPLETED",
-          "failure_class": "ok",
-          "reason": "sentinel"
         }
       ],
-      "attempts": 62,
-      "completed": 59,
+      "attempts": 63,
+      "completed": 60,
       "passed": 34,
-      "failed": 25,
-      "pass_rate": 0.5763,
+      "failed": 26,
+      "pass_rate": 0.5667,
       "rate_is_reportable": true,
-      "flips": 25,
-      "last_verdict": "passed",
-      "last_build": 77,
-      "median_runtime_s": 1147.3,
+      "flips": 26,
+      "last_verdict": "failed",
+      "last_build": 78,
+      "median_runtime_s": 1148.9,
       "median_queue_wait_s": 0.5
     },
     {
@@ -21299,6 +21723,20 @@
       "transport": "MoRIIO",
       "router": "proxy",
       "history": [
+        {
+          "build_number": 78,
+          "date": "2026-09-18",
+          "verdict": "failed",
+          "state": "failed",
+          "runtime_s": 2829.0,
+          "queue_wait_s": 0.4,
+          "agent_name": "spur-login-atl-2",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbbf-462d-8238-35e255ab7234",
+          "phase": "workload",
+          "slurm_state": "FAILED",
+          "failure_class": "workload",
+          "reason": "sentinel"
+        },
         {
           "build_number": 77,
           "date": "2026-09-17",
@@ -21424,32 +21862,18 @@
           "slurm_state": "preflight-rejected",
           "failure_class": "infra",
           "reason": "rank 0 on ml-ai-ubuntu-gpu-mi350x8-2304gb-fabric-9: 8/8 GPUs hold VRAM above 10%; ports already bound: 36367"
-        },
-        {
-          "build_number": 68,
-          "date": "2026-09-08",
-          "verdict": "failed",
-          "state": "failed",
-          "runtime_s": 3810.9,
-          "queue_wait_s": 0.3,
-          "agent_name": "spur-login-atl-5",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/68#01a08264-417b-46ca-81b1-b72c3b00f623",
-          "phase": "workload",
-          "slurm_state": "FAILED",
-          "failure_class": "workload",
-          "reason": "sentinel"
         }
       ],
-      "attempts": 62,
-      "completed": 58,
+      "attempts": 63,
+      "completed": 59,
       "passed": 26,
-      "failed": 32,
-      "pass_rate": 0.4483,
+      "failed": 33,
+      "pass_rate": 0.4407,
       "rate_is_reportable": true,
-      "flips": 21,
-      "last_verdict": "passed",
-      "last_build": 77,
-      "median_runtime_s": 1591.6,
+      "flips": 22,
+      "last_verdict": "failed",
+      "last_build": 78,
+      "median_runtime_s": 1631.7,
       "median_queue_wait_s": 0.4
     },
     {
@@ -21461,6 +21885,20 @@
       "transport": "MoRIIO",
       "router": "vllm-router",
       "history": [
+        {
+          "build_number": 78,
+          "date": "2026-09-18",
+          "verdict": "running",
+          "state": "running",
+          "runtime_s": null,
+          "queue_wait_s": 0.4,
+          "agent_name": "spur-login-atl-4",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbbf-4c41-8c03-2c60bca05433",
+          "phase": "",
+          "slurm_state": "",
+          "failure_class": "",
+          "reason": ""
+        },
         {
           "build_number": 77,
           "date": "2026-09-17",
@@ -21586,23 +22024,9 @@
           "slurm_state": "preflight-rejected",
           "failure_class": "infra",
           "reason": "rank 0 on ml-ai-ubuntu-gpu-mi350x8-2304gb-fabric-9: 8/8 GPUs hold VRAM above 10%; ports already bound: 36367 30000 29000"
-        },
-        {
-          "build_number": 68,
-          "date": "2026-09-08",
-          "verdict": "failed",
-          "state": "failed",
-          "runtime_s": 10187.1,
-          "queue_wait_s": 0.4,
-          "agent_name": "spur-login-atl-4",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/68#01a08264-417b-4d81-b4ca-af60b774f0d0",
-          "phase": "workload",
-          "slurm_state": "workload-timeout",
-          "failure_class": "workload",
-          "reason": "no verdict within 7200s"
         }
       ],
-      "attempts": 62,
+      "attempts": 63,
       "completed": 57,
       "passed": 13,
       "failed": 44,
@@ -21623,6 +22047,20 @@
       "transport": "MoRIIO",
       "router": "proxy",
       "history": [
+        {
+          "build_number": 78,
+          "date": "2026-09-18",
+          "verdict": "failed",
+          "state": "failed",
+          "runtime_s": 1967.2,
+          "queue_wait_s": 0.4,
+          "agent_name": "spur-login-atl-3",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbbc-4199-b8e9-e0b52324cdf7",
+          "phase": "bringup",
+          "slurm_state": "FAILED",
+          "failure_class": "workload",
+          "reason": "gate"
+        },
         {
           "build_number": 77,
           "date": "2026-09-17",
@@ -21748,33 +22186,19 @@
           "slurm_state": "server-failed",
           "failure_class": "bringup",
           "reason": "scontrol JobState=FAILED phase=bringup"
-        },
-        {
-          "build_number": 68,
-          "date": "2026-09-08",
-          "verdict": "failed",
-          "state": "failed",
-          "runtime_s": 1264.2,
-          "queue_wait_s": 0.4,
-          "agent_name": "spur-login-atl-2",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/68#01a08264-4178-464d-8529-90d1ec8b326d",
-          "phase": "bringup",
-          "slurm_state": "FAILED",
-          "failure_class": "workload",
-          "reason": "sentinel"
         }
       ],
-      "attempts": 62,
-      "completed": 57,
+      "attempts": 63,
+      "completed": 58,
       "passed": 14,
-      "failed": 43,
-      "pass_rate": 0.2456,
+      "failed": 44,
+      "pass_rate": 0.2414,
       "rate_is_reportable": true,
       "flips": 8,
       "last_verdict": "failed",
-      "last_build": 77,
-      "median_runtime_s": 1129.9,
-      "median_queue_wait_s": 0.5
+      "last_build": 78,
+      "median_runtime_s": 1134.6,
+      "median_queue_wait_s": 0.4
     },
     {
       "cell_id": "Kimi-K2.5-MXFP4|1P1D|TP8|MoRIIO|vllm-router",
@@ -21785,6 +22209,20 @@
       "transport": "MoRIIO",
       "router": "vllm-router",
       "history": [
+        {
+          "build_number": 78,
+          "date": "2026-09-18",
+          "verdict": "failed",
+          "state": "failed",
+          "runtime_s": 823.8,
+          "queue_wait_s": 0.4,
+          "agent_name": "spur-login-atl-1",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbbc-48bb-aef7-05a9fe66c70c",
+          "phase": "bringup",
+          "slurm_state": "FAILED",
+          "failure_class": "workload",
+          "reason": "gate"
+        },
         {
           "build_number": 77,
           "date": "2026-09-17",
@@ -21910,32 +22348,18 @@
           "slurm_state": "FAILED",
           "failure_class": "workload",
           "reason": "gate"
-        },
-        {
-          "build_number": 68,
-          "date": "2026-09-08",
-          "verdict": "failed",
-          "state": "failed",
-          "runtime_s": 1144.3,
-          "queue_wait_s": 0.4,
-          "agent_name": "spur-login-atl-2",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/68#01a08264-4178-4324-aaa6-05cc39051989",
-          "phase": "bringup",
-          "slurm_state": "server-failed",
-          "failure_class": "bringup",
-          "reason": "scontrol JobState=FAILED phase=bringup"
         }
       ],
-      "attempts": 62,
-      "completed": 57,
+      "attempts": 63,
+      "completed": 58,
       "passed": 14,
-      "failed": 43,
-      "pass_rate": 0.2456,
+      "failed": 44,
+      "pass_rate": 0.2414,
       "rate_is_reportable": true,
       "flips": 10,
       "last_verdict": "failed",
-      "last_build": 77,
-      "median_runtime_s": 1114.8,
+      "last_build": 78,
+      "median_runtime_s": 1104.8,
       "median_queue_wait_s": 0.4
     },
     {
@@ -21947,6 +22371,20 @@
       "transport": "MoRIIO",
       "router": "proxy",
       "history": [
+        {
+          "build_number": 78,
+          "date": "2026-09-18",
+          "verdict": "running",
+          "state": "running",
+          "runtime_s": null,
+          "queue_wait_s": 0.4,
+          "agent_name": "spur-login-atl-2",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbbf-4839-a4e9-1067a27b291d",
+          "phase": "",
+          "slurm_state": "",
+          "failure_class": "",
+          "reason": ""
+        },
         {
           "build_number": 77,
           "date": "2026-09-17",
@@ -22072,23 +22510,9 @@
           "slurm_state": "preflight-rejected",
           "failure_class": "infra",
           "reason": "rank 0 on ml-ai-ubuntu-gpu-mi350x8-2304gb-fabric-9: 8/8 GPUs hold VRAM above 10%; ports already bound: 36367"
-        },
-        {
-          "build_number": 68,
-          "date": "2026-09-08",
-          "verdict": "failed",
-          "state": "failed",
-          "runtime_s": 603.4,
-          "queue_wait_s": 0.4,
-          "agent_name": "spur-login-atl-5",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/68#01a08264-417b-4d29-b193-cc104f4da2a4",
-          "phase": "bringup",
-          "slurm_state": "FAILED",
-          "failure_class": "workload",
-          "reason": "sentinel"
         }
       ],
-      "attempts": 62,
+      "attempts": 63,
       "completed": 57,
       "passed": 14,
       "failed": 43,
@@ -22109,6 +22533,20 @@
       "transport": "MoRIIO",
       "router": "vllm-router",
       "history": [
+        {
+          "build_number": 78,
+          "date": "2026-09-18",
+          "verdict": "waiting",
+          "state": "limited",
+          "runtime_s": null,
+          "queue_wait_s": null,
+          "agent_name": "",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbbf-4257-aac5-2aa3d0510e2e",
+          "phase": "",
+          "slurm_state": "",
+          "failure_class": "",
+          "reason": ""
+        },
         {
           "build_number": 77,
           "date": "2026-09-17",
@@ -22234,23 +22672,9 @@
           "slurm_state": "preflight-rejected",
           "failure_class": "infra",
           "reason": "rank 0 on ml-ai-ubuntu-gpu-mi350x8-2304gb-fabric-9: 8/8 GPUs hold VRAM above 10%; ports already bound: 36367 30000 29000"
-        },
-        {
-          "build_number": 68,
-          "date": "2026-09-08",
-          "verdict": "failed",
-          "state": "failed",
-          "runtime_s": 482.6,
-          "queue_wait_s": 0.4,
-          "agent_name": "spur-login-atl-5",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/68#01a08264-417b-4cef-b64e-71be5e40d3f7",
-          "phase": "bringup",
-          "slurm_state": "FAILED",
-          "failure_class": "workload",
-          "reason": "sentinel"
         }
       ],
-      "attempts": 62,
+      "attempts": 63,
       "completed": 57,
       "passed": 10,
       "failed": 47,
@@ -22271,6 +22695,20 @@
       "transport": "MoRIIO",
       "router": "proxy",
       "history": [
+        {
+          "build_number": 78,
+          "date": "2026-09-18",
+          "verdict": "running",
+          "state": "running",
+          "runtime_s": null,
+          "queue_wait_s": 0.5,
+          "agent_name": "spur-login-atl-1",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbbd-4a73-9b0d-fade6a596051",
+          "phase": "",
+          "slurm_state": "",
+          "failure_class": "",
+          "reason": ""
+        },
         {
           "build_number": 77,
           "date": "2026-09-17",
@@ -22396,23 +22834,9 @@
           "slurm_state": "COMPLETED",
           "failure_class": "ok",
           "reason": "sentinel"
-        },
-        {
-          "build_number": 68,
-          "date": "2026-09-08",
-          "verdict": "passed",
-          "state": "passed",
-          "runtime_s": 3665.5,
-          "queue_wait_s": 0.5,
-          "agent_name": "spur-login-atl-1",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/68#01a08264-4179-441c-bc99-a5092aae0884",
-          "phase": "workload",
-          "slurm_state": "COMPLETED",
-          "failure_class": "ok",
-          "reason": "sentinel"
         }
       ],
-      "attempts": 62,
+      "attempts": 63,
       "completed": 57,
       "passed": 24,
       "failed": 33,
@@ -22433,6 +22857,20 @@
       "transport": "MoRIIO",
       "router": "vllm-router",
       "history": [
+        {
+          "build_number": 78,
+          "date": "2026-09-18",
+          "verdict": "running",
+          "state": "running",
+          "runtime_s": null,
+          "queue_wait_s": 0.4,
+          "agent_name": "spur-login-atl-3",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbbd-4b0f-a351-8b6494abedea",
+          "phase": "",
+          "slurm_state": "",
+          "failure_class": "",
+          "reason": ""
+        },
         {
           "build_number": 77,
           "date": "2026-09-17",
@@ -22558,23 +22996,9 @@
           "slurm_state": "FAILED",
           "failure_class": "workload",
           "reason": "gate"
-        },
-        {
-          "build_number": 68,
-          "date": "2026-09-08",
-          "verdict": "passed",
-          "state": "passed",
-          "runtime_s": 2565.4,
-          "queue_wait_s": 0.5,
-          "agent_name": "spur-login-atl-2",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/68#01a08264-4179-405e-8175-2b4af024f55d",
-          "phase": "workload",
-          "slurm_state": "COMPLETED",
-          "failure_class": "ok",
-          "reason": "gate"
         }
       ],
-      "attempts": 62,
+      "attempts": 63,
       "completed": 57,
       "passed": 27,
       "failed": 30,
@@ -22595,6 +23019,20 @@
       "transport": "MoRIIO",
       "router": "proxy",
       "history": [
+        {
+          "build_number": 78,
+          "date": "2026-09-18",
+          "verdict": "waiting",
+          "state": "limited",
+          "runtime_s": null,
+          "queue_wait_s": null,
+          "agent_name": "",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbc0-4067-badf-deb9caa23f70",
+          "phase": "",
+          "slurm_state": "",
+          "failure_class": "",
+          "reason": ""
+        },
         {
           "build_number": 77,
           "date": "2026-09-17",
@@ -22720,23 +23158,9 @@
           "slurm_state": "preflight-rejected",
           "failure_class": "infra",
           "reason": "rank 0 on ml-ai-ubuntu-gpu-mi350x8-2304gb-fabric-9: 8/8 GPUs hold VRAM above 10%; ports already bound: 36367"
-        },
-        {
-          "build_number": 68,
-          "date": "2026-09-08",
-          "verdict": "failed",
-          "state": "failed",
-          "runtime_s": 1922.1,
-          "queue_wait_s": 0.5,
-          "agent_name": "spur-login-atl-5",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/68#01a08264-417c-41ed-b306-e550724e8960",
-          "phase": "workload",
-          "slurm_state": "FAILED",
-          "failure_class": "workload",
-          "reason": "sentinel"
         }
       ],
-      "attempts": 62,
+      "attempts": 63,
       "completed": 57,
       "passed": 15,
       "failed": 42,
@@ -22757,6 +23181,20 @@
       "transport": "MoRIIO",
       "router": "vllm-router",
       "history": [
+        {
+          "build_number": 78,
+          "date": "2026-09-18",
+          "verdict": "waiting",
+          "state": "limited",
+          "runtime_s": null,
+          "queue_wait_s": null,
+          "agent_name": "",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbc0-4628-b2ab-5822c814cee7",
+          "phase": "",
+          "slurm_state": "",
+          "failure_class": "",
+          "reason": ""
+        },
         {
           "build_number": 77,
           "date": "2026-09-17",
@@ -22882,23 +23320,9 @@
           "slurm_state": "preflight-rejected",
           "failure_class": "infra",
           "reason": "rank 0 on ml-ai-ubuntu-gpu-mi350x8-2304gb-fabric-9: 8/8 GPUs hold VRAM above 10%; ports already bound: 36367 30000 29000"
-        },
-        {
-          "build_number": 68,
-          "date": "2026-09-08",
-          "verdict": "passed",
-          "state": "passed",
-          "runtime_s": 779.4,
-          "queue_wait_s": 0.4,
-          "agent_name": "spur-login-atl-5",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/68#01a08264-417c-4b2b-b986-c70d5e86ae49",
-          "phase": "workload",
-          "slurm_state": "COMPLETED",
-          "failure_class": "ok",
-          "reason": "sentinel"
         }
       ],
-      "attempts": 62,
+      "attempts": 63,
       "completed": 57,
       "passed": 15,
       "failed": 42,
@@ -22919,6 +23343,20 @@
       "transport": "MoRIIO",
       "router": "proxy",
       "history": [
+        {
+          "build_number": 78,
+          "date": "2026-09-18",
+          "verdict": "waiting",
+          "state": "limited",
+          "runtime_s": null,
+          "queue_wait_s": null,
+          "agent_name": "",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbbd-40bc-b8ca-d79b820b312d",
+          "phase": "",
+          "slurm_state": "",
+          "failure_class": "",
+          "reason": ""
+        },
         {
           "build_number": 77,
           "date": "2026-09-17",
@@ -23044,23 +23482,9 @@
           "slurm_state": "server-failed",
           "failure_class": "bringup",
           "reason": "scontrol JobState=FAILED phase=bringup"
-        },
-        {
-          "build_number": 68,
-          "date": "2026-09-08",
-          "verdict": "failed",
-          "state": "failed",
-          "runtime_s": 803.7,
-          "queue_wait_s": 0.4,
-          "agent_name": "spur-login-atl-2",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/68#01a08264-4179-4043-8281-162a5ba797b5",
-          "phase": "bringup",
-          "slurm_state": "server-failed",
-          "failure_class": "bringup",
-          "reason": "scontrol JobState=FAILED phase=bringup"
         }
       ],
-      "attempts": 62,
+      "attempts": 63,
       "completed": 57,
       "passed": 31,
       "failed": 26,
@@ -23081,6 +23505,20 @@
       "transport": "MoRIIO",
       "router": "vllm-router",
       "history": [
+        {
+          "build_number": 78,
+          "date": "2026-09-18",
+          "verdict": "waiting",
+          "state": "limited",
+          "runtime_s": null,
+          "queue_wait_s": null,
+          "agent_name": "",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbbd-4d7c-8ad0-d4e8a59e8735",
+          "phase": "",
+          "slurm_state": "",
+          "failure_class": "",
+          "reason": ""
+        },
         {
           "build_number": 77,
           "date": "2026-09-17",
@@ -23206,23 +23644,9 @@
           "slurm_state": "server-failed",
           "failure_class": "bringup",
           "reason": "scontrol JobState=FAILED phase=bringup"
-        },
-        {
-          "build_number": 68,
-          "date": "2026-09-08",
-          "verdict": "failed",
-          "state": "failed",
-          "runtime_s": 1606.3,
-          "queue_wait_s": 0.4,
-          "agent_name": "spur-login-atl-1",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/68#01a08264-417a-40ce-a1f2-210eaf42976e",
-          "phase": "bringup",
-          "slurm_state": "server-failed",
-          "failure_class": "bringup",
-          "reason": "scontrol JobState=FAILED phase=bringup"
         }
       ],
-      "attempts": 62,
+      "attempts": 63,
       "completed": 57,
       "passed": 28,
       "failed": 29,
@@ -23243,6 +23667,20 @@
       "transport": "MoRIIO",
       "router": "proxy",
       "history": [
+        {
+          "build_number": 78,
+          "date": "2026-09-18",
+          "verdict": "waiting",
+          "state": "limited",
+          "runtime_s": null,
+          "queue_wait_s": null,
+          "agent_name": "",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbc0-467a-8d8a-11226c427664",
+          "phase": "",
+          "slurm_state": "",
+          "failure_class": "",
+          "reason": ""
+        },
         {
           "build_number": 77,
           "date": "2026-09-17",
@@ -23368,23 +23806,9 @@
           "slurm_state": "preflight-rejected",
           "failure_class": "infra",
           "reason": "rank 0 on ml-ai-ubuntu-gpu-mi350x8-2304gb-fabric-9: 8/8 GPUs hold VRAM above 10%; ports already bound: 36367"
-        },
-        {
-          "build_number": 68,
-          "date": "2026-09-08",
-          "verdict": "failed",
-          "state": "failed",
-          "runtime_s": 924.4,
-          "queue_wait_s": 0.5,
-          "agent_name": "spur-login-atl-5",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/68#01a08264-417c-42a8-a8a6-fd9ec37535e2",
-          "phase": "bringup",
-          "slurm_state": "server-failed",
-          "failure_class": "bringup",
-          "reason": "scontrol JobState=FAILED phase=bringup"
         }
       ],
-      "attempts": 62,
+      "attempts": 63,
       "completed": 57,
       "passed": 29,
       "failed": 28,
@@ -23405,6 +23829,20 @@
       "transport": "MoRIIO",
       "router": "vllm-router",
       "history": [
+        {
+          "build_number": 78,
+          "date": "2026-09-18",
+          "verdict": "waiting",
+          "state": "limited",
+          "runtime_s": null,
+          "queue_wait_s": null,
+          "agent_name": "",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbc0-42c6-b563-709a955004fc",
+          "phase": "",
+          "slurm_state": "",
+          "failure_class": "",
+          "reason": ""
+        },
         {
           "build_number": 77,
           "date": "2026-09-17",
@@ -23530,23 +23968,9 @@
           "slurm_state": "preflight-rejected",
           "failure_class": "infra",
           "reason": "rank 0 on ml-ai-ubuntu-gpu-mi350x8-2304gb-fabric-9: 8/8 GPUs hold VRAM above 10%; ports already bound: 36367 30000 29000"
-        },
-        {
-          "build_number": 68,
-          "date": "2026-09-08",
-          "verdict": "failed",
-          "state": "failed",
-          "runtime_s": 522.9,
-          "queue_wait_s": 0.4,
-          "agent_name": "spur-login-atl-5",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/68#01a08264-417d-4c4b-a941-79c0e615c1dc",
-          "phase": "bringup",
-          "slurm_state": "server-failed",
-          "failure_class": "bringup",
-          "reason": "scontrol JobState=FAILED phase=bringup"
         }
       ],
-      "attempts": 62,
+      "attempts": 63,
       "completed": 57,
       "passed": 17,
       "failed": 40,
@@ -23567,6 +23991,20 @@
       "transport": "MoRIIO",
       "router": "proxy",
       "history": [
+        {
+          "build_number": 78,
+          "date": "2026-09-18",
+          "verdict": "waiting",
+          "state": "limited",
+          "runtime_s": null,
+          "queue_wait_s": null,
+          "agent_name": "",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbbe-4c4d-99ee-662c1319d995",
+          "phase": "",
+          "slurm_state": "",
+          "failure_class": "",
+          "reason": ""
+        },
         {
           "build_number": 77,
           "date": "2026-09-17",
@@ -23680,7 +24118,7 @@
           "reason": "gate"
         }
       ],
-      "attempts": 8,
+      "attempts": 9,
       "completed": 8,
       "passed": 3,
       "failed": 5,
@@ -23701,6 +24139,20 @@
       "transport": "MoRIIO",
       "router": "vllm-router",
       "history": [
+        {
+          "build_number": 78,
+          "date": "2026-09-18",
+          "verdict": "waiting",
+          "state": "limited",
+          "runtime_s": null,
+          "queue_wait_s": null,
+          "agent_name": "",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbbe-4f21-aca3-a98f0368482c",
+          "phase": "",
+          "slurm_state": "",
+          "failure_class": "",
+          "reason": ""
+        },
         {
           "build_number": 77,
           "date": "2026-09-17",
@@ -23814,7 +24266,7 @@
           "reason": "sentinel"
         }
       ],
-      "attempts": 8,
+      "attempts": 9,
       "completed": 8,
       "passed": 2,
       "failed": 6,
@@ -23877,6 +24329,20 @@
       "transport": "MoRIIO",
       "router": "proxy",
       "history": [
+        {
+          "build_number": 78,
+          "date": "2026-09-18",
+          "verdict": "waiting",
+          "state": "limited",
+          "runtime_s": null,
+          "queue_wait_s": null,
+          "agent_name": "",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbc0-4c05-9348-b2fdd38d8093",
+          "phase": "",
+          "slurm_state": "",
+          "failure_class": "",
+          "reason": ""
+        },
         {
           "build_number": 77,
           "date": "2026-09-17",
@@ -24002,23 +24468,9 @@
           "slurm_state": "FAILED",
           "failure_class": "workload",
           "reason": "sentinel"
-        },
-        {
-          "build_number": 68,
-          "date": "2026-09-08",
-          "verdict": "passed",
-          "state": "passed",
-          "runtime_s": 1701.1,
-          "queue_wait_s": 0.5,
-          "agent_name": "spur-login-atl-2",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/68#01a08264-417d-48ca-a523-189c067e5b2f",
-          "phase": "workload",
-          "slurm_state": "COMPLETED",
-          "failure_class": "ok",
-          "reason": "gate"
         }
       ],
-      "attempts": 31,
+      "attempts": 32,
       "completed": 31,
       "passed": 13,
       "failed": 18,
@@ -24039,6 +24491,20 @@
       "transport": "MoRIIO",
       "router": "vllm-router",
       "history": [
+        {
+          "build_number": 78,
+          "date": "2026-09-18",
+          "verdict": "waiting",
+          "state": "limited",
+          "runtime_s": null,
+          "queue_wait_s": null,
+          "agent_name": "",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbc1-4ca4-b9c0-bc2dc7ec1fc5",
+          "phase": "",
+          "slurm_state": "",
+          "failure_class": "",
+          "reason": ""
+        },
         {
           "build_number": 77,
           "date": "2026-09-17",
@@ -24164,23 +24630,9 @@
           "slurm_state": "FAILED",
           "failure_class": "workload",
           "reason": "gate"
-        },
-        {
-          "build_number": 68,
-          "date": "2026-09-08",
-          "verdict": "passed",
-          "state": "passed",
-          "runtime_s": 1260.6,
-          "queue_wait_s": 0.4,
-          "agent_name": "spur-login-atl-1",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/68#01a08264-417d-4844-a3ae-c6c0ac6ef409",
-          "phase": "workload",
-          "slurm_state": "COMPLETED",
-          "failure_class": "ok",
-          "reason": "sentinel"
         }
       ],
-      "attempts": 31,
+      "attempts": 32,
       "completed": 31,
       "passed": 13,
       "failed": 18,
@@ -24243,6 +24695,20 @@
       "transport": "MoRIIO",
       "router": "proxy",
       "history": [
+        {
+          "build_number": 78,
+          "date": "2026-09-18",
+          "verdict": "waiting",
+          "state": "limited",
+          "runtime_s": null,
+          "queue_wait_s": null,
+          "agent_name": "",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbc1-4bd1-9a10-802ce78ac104",
+          "phase": "",
+          "slurm_state": "",
+          "failure_class": "",
+          "reason": ""
+        },
         {
           "build_number": 77,
           "date": "2026-09-17",
@@ -24368,23 +24834,9 @@
           "slurm_state": "FAILED",
           "failure_class": "workload",
           "reason": "sentinel"
-        },
-        {
-          "build_number": 68,
-          "date": "2026-09-08",
-          "verdict": "passed",
-          "state": "passed",
-          "runtime_s": 1014.8,
-          "queue_wait_s": 0.4,
-          "agent_name": "spur-login-atl-2",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/68#01a08264-417d-459e-8c0c-a2a94ca8511a",
-          "phase": "workload",
-          "slurm_state": "COMPLETED",
-          "failure_class": "ok",
-          "reason": "gate"
         }
       ],
-      "attempts": 31,
+      "attempts": 32,
       "completed": 31,
       "passed": 10,
       "failed": 21,
@@ -24405,6 +24857,20 @@
       "transport": "MoRIIO",
       "router": "vllm-router",
       "history": [
+        {
+          "build_number": 78,
+          "date": "2026-09-18",
+          "verdict": "waiting",
+          "state": "limited",
+          "runtime_s": null,
+          "queue_wait_s": null,
+          "agent_name": "",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbc1-45e1-bb03-bece6a29832f",
+          "phase": "",
+          "slurm_state": "",
+          "failure_class": "",
+          "reason": ""
+        },
         {
           "build_number": 77,
           "date": "2026-09-17",
@@ -24530,23 +24996,9 @@
           "slurm_state": "FAILED",
           "failure_class": "workload",
           "reason": "gate"
-        },
-        {
-          "build_number": 68,
-          "date": "2026-09-08",
-          "verdict": "passed",
-          "state": "passed",
-          "runtime_s": 1411.1,
-          "queue_wait_s": 0.5,
-          "agent_name": "spur-login-atl-1",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/68#01a08264-417e-4dde-9110-daf127ea2e20",
-          "phase": "workload",
-          "slurm_state": "COMPLETED",
-          "failure_class": "ok",
-          "reason": "sentinel"
         }
       ],
-      "attempts": 31,
+      "attempts": 32,
       "completed": 31,
       "passed": 13,
       "failed": 18,
@@ -24609,6 +25061,20 @@
       "transport": "MoRIIO",
       "router": "proxy",
       "history": [
+        {
+          "build_number": 78,
+          "date": "2026-09-18",
+          "verdict": "waiting",
+          "state": "limited",
+          "runtime_s": null,
+          "queue_wait_s": null,
+          "agent_name": "",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbc1-44bb-8082-bd729fcd9b60",
+          "phase": "",
+          "slurm_state": "",
+          "failure_class": "",
+          "reason": ""
+        },
         {
           "build_number": 77,
           "date": "2026-09-17",
@@ -24734,23 +25200,9 @@
           "slurm_state": "FAILED",
           "failure_class": "workload",
           "reason": "gate"
-        },
-        {
-          "build_number": 68,
-          "date": "2026-09-08",
-          "verdict": "passed",
-          "state": "passed",
-          "runtime_s": 1931.3,
-          "queue_wait_s": 0.5,
-          "agent_name": "spur-login-atl-2",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/68#01a08264-417e-479d-a52b-ea6f5bb0118c",
-          "phase": "workload",
-          "slurm_state": "COMPLETED",
-          "failure_class": "ok",
-          "reason": "gate"
         }
       ],
-      "attempts": 31,
+      "attempts": 32,
       "completed": 31,
       "passed": 14,
       "failed": 17,
@@ -24771,6 +25223,20 @@
       "transport": "MoRIIO",
       "router": "vllm-router",
       "history": [
+        {
+          "build_number": 78,
+          "date": "2026-09-18",
+          "verdict": "waiting",
+          "state": "limited",
+          "runtime_s": null,
+          "queue_wait_s": null,
+          "agent_name": "",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbc2-4014-8f7c-605f1a969967",
+          "phase": "",
+          "slurm_state": "",
+          "failure_class": "",
+          "reason": ""
+        },
         {
           "build_number": 77,
           "date": "2026-09-17",
@@ -24896,23 +25362,9 @@
           "slurm_state": "FAILED",
           "failure_class": "workload",
           "reason": "sentinel"
-        },
-        {
-          "build_number": 68,
-          "date": "2026-09-08",
-          "verdict": "passed",
-          "state": "passed",
-          "runtime_s": 1745.9,
-          "queue_wait_s": 0.4,
-          "agent_name": "spur-login-atl-1",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/68#01a08264-417f-46c3-95dd-e8fd72383afa",
-          "phase": "workload",
-          "slurm_state": "COMPLETED",
-          "failure_class": "ok",
-          "reason": "sentinel"
         }
       ],
-      "attempts": 31,
+      "attempts": 32,
       "completed": 31,
       "passed": 15,
       "failed": 16,
@@ -24975,6 +25427,20 @@
       "transport": "MoRIIO",
       "router": "proxy",
       "history": [
+        {
+          "build_number": 78,
+          "date": "2026-09-18",
+          "verdict": "waiting",
+          "state": "limited",
+          "runtime_s": null,
+          "queue_wait_s": null,
+          "agent_name": "",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbc2-4ffb-a5af-478294763f40",
+          "phase": "",
+          "slurm_state": "",
+          "failure_class": "",
+          "reason": ""
+        },
         {
           "build_number": 77,
           "date": "2026-09-17",
@@ -25100,23 +25566,9 @@
           "slurm_state": "FAILED",
           "failure_class": "workload",
           "reason": "sentinel"
-        },
-        {
-          "build_number": 68,
-          "date": "2026-09-08",
-          "verdict": "passed",
-          "state": "passed",
-          "runtime_s": 1355.3,
-          "queue_wait_s": 0.4,
-          "agent_name": "spur-login-atl-2",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/68#01a08264-417f-43d7-af0d-dff551bb41c0",
-          "phase": "workload",
-          "slurm_state": "COMPLETED",
-          "failure_class": "ok",
-          "reason": "gate"
         }
       ],
-      "attempts": 31,
+      "attempts": 32,
       "completed": 31,
       "passed": 15,
       "failed": 16,
@@ -25137,6 +25589,20 @@
       "transport": "MoRIIO",
       "router": "vllm-router",
       "history": [
+        {
+          "build_number": 78,
+          "date": "2026-09-18",
+          "verdict": "waiting",
+          "state": "limited",
+          "runtime_s": null,
+          "queue_wait_s": null,
+          "agent_name": "",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbc2-4209-a555-32cf0e678ab2",
+          "phase": "",
+          "slurm_state": "",
+          "failure_class": "",
+          "reason": ""
+        },
         {
           "build_number": 77,
           "date": "2026-09-17",
@@ -25262,23 +25728,9 @@
           "slurm_state": "FAILED",
           "failure_class": "workload",
           "reason": "gate"
-        },
-        {
-          "build_number": 68,
-          "date": "2026-09-08",
-          "verdict": "passed",
-          "state": "passed",
-          "runtime_s": 1483.3,
-          "queue_wait_s": 0.5,
-          "agent_name": "spur-login-atl-1",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/68#01a08264-417f-4485-916f-c3a1a62de4bf",
-          "phase": "workload",
-          "slurm_state": "COMPLETED",
-          "failure_class": "ok",
-          "reason": "gate"
         }
       ],
-      "attempts": 31,
+      "attempts": 32,
       "completed": 31,
       "passed": 13,
       "failed": 18,
@@ -25341,6 +25793,20 @@
       "transport": "MoRIIO",
       "router": "proxy",
       "history": [
+        {
+          "build_number": 78,
+          "date": "2026-09-18",
+          "verdict": "waiting",
+          "state": "limited",
+          "runtime_s": null,
+          "queue_wait_s": null,
+          "agent_name": "",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbc2-422c-9063-100330118dea",
+          "phase": "",
+          "slurm_state": "",
+          "failure_class": "",
+          "reason": ""
+        },
         {
           "build_number": 77,
           "date": "2026-09-17",
@@ -25466,23 +25932,9 @@
           "slurm_state": "FAILED",
           "failure_class": "workload",
           "reason": "gate"
-        },
-        {
-          "build_number": 68,
-          "date": "2026-09-08",
-          "verdict": "passed",
-          "state": "passed",
-          "runtime_s": 6214.7,
-          "queue_wait_s": 0.3,
-          "agent_name": "spur-login-atl-2",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/68#01a08264-417f-4b59-b50c-dc6b49dbf75e",
-          "phase": "workload",
-          "slurm_state": "COMPLETED",
-          "failure_class": "ok",
-          "reason": "gate"
         }
       ],
-      "attempts": 31,
+      "attempts": 32,
       "completed": 31,
       "passed": 13,
       "failed": 18,
@@ -25503,6 +25955,20 @@
       "transport": "MoRIIO",
       "router": "vllm-router",
       "history": [
+        {
+          "build_number": 78,
+          "date": "2026-09-18",
+          "verdict": "waiting",
+          "state": "limited",
+          "runtime_s": null,
+          "queue_wait_s": null,
+          "agent_name": "",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbc2-4e92-a2f2-8d2a75e4df6a",
+          "phase": "",
+          "slurm_state": "",
+          "failure_class": "",
+          "reason": ""
+        },
         {
           "build_number": 77,
           "date": "2026-09-17",
@@ -25628,23 +26094,9 @@
           "slurm_state": "FAILED",
           "failure_class": "workload",
           "reason": "gate"
-        },
-        {
-          "build_number": 68,
-          "date": "2026-09-08",
-          "verdict": "passed",
-          "state": "passed",
-          "runtime_s": 5824.5,
-          "queue_wait_s": 0.4,
-          "agent_name": "spur-login-atl-1",
-          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/68#01a08264-4180-4ba1-b1ec-43b62afaaa96",
-          "phase": "workload",
-          "slurm_state": "COMPLETED",
-          "failure_class": "ok",
-          "reason": "gate"
         }
       ],
-      "attempts": 31,
+      "attempts": 32,
       "completed": 31,
       "passed": 10,
       "failed": 21,
@@ -25707,6 +26159,20 @@
       "transport": "MoRIIO",
       "router": "proxy",
       "history": [
+        {
+          "build_number": 78,
+          "date": "2026-09-18",
+          "verdict": "waiting",
+          "state": "limited",
+          "runtime_s": null,
+          "queue_wait_s": null,
+          "agent_name": "",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbc3-453c-872c-d11f2c52e642",
+          "phase": "",
+          "slurm_state": "",
+          "failure_class": "",
+          "reason": ""
+        },
         {
           "build_number": 77,
           "date": "2026-09-17",
@@ -25820,7 +26286,7 @@
           "reason": "scontrol JobState=FAILED phase=bringup"
         }
       ],
-      "attempts": 8,
+      "attempts": 9,
       "completed": 8,
       "passed": 0,
       "failed": 8,
@@ -25841,6 +26307,20 @@
       "transport": "MoRIIO",
       "router": "vllm-router",
       "history": [
+        {
+          "build_number": 78,
+          "date": "2026-09-18",
+          "verdict": "waiting",
+          "state": "limited",
+          "runtime_s": null,
+          "queue_wait_s": null,
+          "agent_name": "",
+          "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/78#01a0b5e3-dbc3-4268-b8f6-bbafe57731dd",
+          "phase": "",
+          "slurm_state": "",
+          "failure_class": "",
+          "reason": ""
+        },
         {
           "build_number": 77,
           "date": "2026-09-17",
@@ -25954,7 +26434,7 @@
           "reason": "gate"
         }
       ],
-      "attempts": 8,
+      "attempts": 9,
       "completed": 8,
       "passed": 0,
       "failed": 8,
@@ -26235,27 +26715,27 @@
   "agents": [
     {
       "agent_name": "spur-login-atl-3",
-      "completed": 370,
-      "failed": 262,
-      "failure_rate": 0.7081
+      "completed": 373,
+      "failed": 265,
+      "failure_rate": 0.7105
     },
     {
       "agent_name": "spur-login-atl-2",
-      "completed": 322,
-      "failed": 198,
-      "failure_rate": 0.6149
+      "completed": 324,
+      "failed": 200,
+      "failure_rate": 0.6173
     },
     {
       "agent_name": "spur-login-atl-1",
-      "completed": 295,
-      "failed": 172,
-      "failure_rate": 0.5831
+      "completed": 298,
+      "failed": 175,
+      "failure_rate": 0.5872
     },
     {
       "agent_name": "spur-login-atl-4",
-      "completed": 292,
-      "failed": 170,
-      "failure_rate": 0.5822
+      "completed": 293,
+      "failed": 171,
+      "failure_rate": 0.5836
     },
     {
       "agent_name": "spur-login-atl-5",
@@ -26266,8 +26746,8 @@
   ],
   "failure_classes": {
     "bringup": 131,
-    "infra": 264,
+    "infra": 268,
     "unknown": 58,
-    "workload": 512
+    "workload": 517
   }
 }
