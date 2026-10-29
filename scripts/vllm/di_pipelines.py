@@ -68,16 +68,6 @@ MODELS = (
 SHAPES = ("1P1D", "2P2D")
 ROUTERS = ("proxy", "vllm-router")
 
-# KV transports, each rendered as its own stack of grids. Transport is a grid
-# property rather than a global constant because a NIXL cell shares model,
-# shape, mode and router with its MoRIIO twin and differs only by transport —
-# the same collapse the per-grid ``mode`` exists to prevent, one axis over.
-TRANSPORTS = ("MoRIIO", "NIXL", "NIXL-PUSH")
-
-# Deprecated: the pre-schema-3 scalar. Emitted as ``axes.transport`` for one
-# release so a consumer reading the old field does not blank mid-deploy.
-TRANSPORT = TRANSPORTS[0]
-
 # One grid per parallelism family, rendered top to bottom in this order.
 #
 # Mode is a grid selector, not a global constant: a wide-EP cell shares model,
@@ -142,6 +132,18 @@ GRIDS = (
                 "scales with node count, so 2P2D is EP16/DP16; only 1P1D is "
                 "defined upstream so far.",
     },
+)
+
+# Not rendered yet. vLLM PR #62007 is still open, so these six steps do not
+# exist upstream and four grids of "never run" would be noise rather than a
+# coverage gap. Append to GRIDS to turn them on once the PR merges:
+#
+#     GRIDS = GRIDS + NIXL_GRIDS
+#
+# Until then a NIXL record, if one appears early, lands in the unexpected-steps
+# panel with its transport correctly parsed — captured and visible, not folded
+# into a MoRIIO cell.
+NIXL_GRIDS = (
     {
         "key": "tp8-nixl",
         "transport": "NIXL",
@@ -181,3 +183,19 @@ GRIDS = (
         "note": _NIXL_NOTE,
     },
 )
+
+# Transport is a grid property rather than a global constant because a NIXL cell
+# shares model, shape, mode and router with its MoRIIO twin and differs only by
+# transport — the same collapse the per-grid ``mode`` exists to prevent, one axis
+# over.
+#
+# The dashboard list is derived from GRIDS, in grid order and de-duplicated, so
+# enabling NIXL_GRIDS cannot leave the "KV transport" row advertising a transport
+# no grid renders. Note this is a narrower set than ``di_labels.TRANSPORTS``,
+# which is the parser's vocabulary and must keep recognising NIXL whether or not
+# a grid shows it.
+TRANSPORTS = tuple(dict.fromkeys(g["transport"] for g in GRIDS))
+
+# Deprecated: the pre-schema-3 scalar. Emitted as ``axes.transport`` for one
+# release so a consumer reading the old field does not blank mid-deploy.
+TRANSPORT = TRANSPORTS[0]

@@ -5,7 +5,7 @@ from collections import Counter
 from vllm.build_di_grid import MIN_SAMPLES_FOR_RATE, build_grid, expected_cells
 from vllm.di_collect import job_record
 from vllm.di_labels import parse_label
-from vllm.di_pipelines import GRIDS, MODELS
+from vllm.di_pipelines import GRIDS, MODELS, NIXL_GRIDS
 
 BUILD = {
     "number": 100,
@@ -57,9 +57,7 @@ def test_every_grid_is_enumerated_in_full():
         for g in GRIDS
     }
     assert counts == expected
-    # The MoRIIO grids span every model; the NIXL ones are DeepSeek-V3 only.
     assert counts["tp8"] == counts["wide-ep"] == len(MODELS) * 2 * 2
-    assert counts["tp8-nixl"] == 2
 
 
 def test_expert_parallelism_scales_with_node_count():
@@ -118,16 +116,24 @@ NIXL_PUSH_LABEL = "DeepSeek-V3-PD-1P1D-TP8-NIXL-PUSH-vllm-router"
 MORIIO_TWIN_LABEL = "DeepSeek-V3-PD-1P1D-TP8-MoRIIO-vllm-router"
 
 
-def test_nixl_steps_land_in_their_enumerated_cells_not_the_unexpected_bucket():
+def test_an_early_nixl_step_surfaces_rather_than_corrupting_a_moriio_cell():
+    # The NIXL grids are off, so a NIXL record arriving before PR #62007 merges
+    # has no enumerated home. The requirement is that it stays visible and stays
+    # itself: flagged unexpected, with its own transport, and crucially not
+    # folded into the MoRIIO cell it shares model/shape/mode/router with.
     grid = build_grid([
         record(1, label=NIXL_LABEL),
         record(1, label=NIXL_PUSH_LABEL),
     ])
-    nixl = cell_by_id(grid, parse_label(NIXL_LABEL).cell_id)
-    push = cell_by_id(grid, parse_label(NIXL_PUSH_LABEL).cell_id)
-    assert (nixl["grid"], push["grid"]) == ("tp8-nixl", "tp8-nixl-push")
-    assert (nixl["transport"], push["transport"]) == ("NIXL", "NIXL-PUSH")
-    assert not [c for c in grid["cells"] if c.get("unexpected")]
+    extra = {c["cell_id"]: c for c in grid["cells"] if c.get("unexpected")}
+    nixl_id = parse_label(NIXL_LABEL).cell_id
+    push_id = parse_label(NIXL_PUSH_LABEL).cell_id
+    assert set(extra) == {nixl_id, push_id}
+    assert extra[nixl_id]["transport"] == "NIXL"
+    assert extra[push_id]["transport"] == "NIXL-PUSH"
+    # The MoRIIO twin is enumerated and must be untouched by either record.
+    twin = cell_by_id(grid, parse_label(MORIIO_TWIN_LABEL).cell_id)
+    assert twin["attempts"] == 0
 
 
 def test_transport_twins_do_not_collide():
@@ -159,11 +165,16 @@ def test_no_two_enumerated_cells_share_a_render_key():
     assert [k for k, n in keys.items() if n > 1] == []
 
 
-def test_nixl_grids_are_deepseek_v3_only():
-    models = {
-        c["model"] for c in expected_cells() if c["transport"].startswith("NIXL")
-    }
-    assert models == {"DeepSeek-V3"}
+def test_nixl_grids_are_held_back_but_stay_ready_to_enable():
+    # Defined, not rendered, until vLLM PR #62007 merges. Asserting the shape of
+    # the held-back definitions is what stops them rotting unnoticed while they
+    # are off the page — the enable step is meant to be a one-line append.
+    assert not any(g["transport"].startswith("NIXL") for g in GRIDS)
+    assert {g["transport"] for g in NIXL_GRIDS} == {"NIXL", "NIXL-PUSH"}
+    assert all(g["models"] == ("DeepSeek-V3",) for g in NIXL_GRIDS)
+    assert all(g["routers"] == ("vllm-router",) for g in NIXL_GRIDS)
+    keys = [g["key"] for g in GRIDS + NIXL_GRIDS]
+    assert len(set(keys)) == len(keys)
 
 
 def test_v4_pro_is_enumerated_with_its_proxy_gap_visible():
@@ -186,9 +197,12 @@ def test_build_rollup_runs_carry_transport():
     assert {r["transport"] for r in runs} == {"MoRIIO", "NIXL"}
 
 
-def test_axes_expose_transports_and_per_grid_transport():
+def test_axes_advertise_only_transports_a_grid_renders():
+    # NIXL_GRIDS are defined but not enabled, so NIXL must not appear in the
+    # axes: the "KV transport" row is read as a statement about what the page
+    # shows, and listing a transport with no grid behind it is a false claim.
     axes = build_grid([])["axes"]
-    assert axes["transports"] == ["MoRIIO", "NIXL", "NIXL-PUSH"]
+    assert axes["transports"] == ["MoRIIO"]
     # Deprecated scalar, kept one release for consumers not yet migrated.
     assert axes["transport"] == "MoRIIO"
     assert all("transport" in g and "models" in g for g in axes["grids"])
