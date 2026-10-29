@@ -5,6 +5,7 @@ from collections import Counter
 from vllm.build_di_grid import MIN_SAMPLES_FOR_RATE, build_grid, expected_cells
 from vllm.di_collect import job_record
 from vllm.di_labels import parse_label
+from vllm.di_pipelines import GRIDS, MODELS
 
 BUILD = {
     "number": 100,
@@ -50,8 +51,15 @@ def cell_by_id(grid, cell_id):
 # ---------------------------------------------------------------------------
 
 def test_every_grid_is_enumerated_in_full():
-    cells = expected_cells()
-    assert Counter(c["grid"] for c in cells) == {"tp8": 24, "wide-ep": 24}
+    counts = Counter(c["grid"] for c in expected_cells())
+    expected = {
+        g["key"]: len(g.get("models", MODELS)) * len(g["shapes"]) * len(g["routers"])
+        for g in GRIDS
+    }
+    assert counts == expected
+    # The MoRIIO grids span every model; the NIXL ones are DeepSeek-V3 only.
+    assert counts["tp8"] == counts["wide-ep"] == len(MODELS) * 2 * 2
+    assert counts["tp8-nixl"] == 2
 
 
 def test_expert_parallelism_scales_with_node_count():
@@ -81,7 +89,7 @@ def test_a_real_wide_ep_2p2d_label_would_land_in_its_enumerated_cell():
 
 def test_cells_that_never_ran_are_rendered_not_omitted():
     grid = build_grid([])
-    assert len(grid["cells"]) == 48
+    assert len(grid["cells"]) == len(expected_cells())
     assert all(c["last_verdict"] == "never_run" for c in grid["cells"])
     assert cell_by_id(grid, CELL_ID)["pass_rate"] is None
 
@@ -99,6 +107,91 @@ def test_tp8_and_wide_ep_cells_do_not_collide():
     assert (tp8["grid"], wide["grid"]) == ("tp8", "wide-ep")
     assert (tp8["last_verdict"], wide["last_verdict"]) == ("passed", "failed")
     assert not [c for c in grid["cells"] if c.get("unexpected")]
+
+
+# ---------------------------------------------------------------------------
+# Transport as an axis — vLLM PR #62007
+# ---------------------------------------------------------------------------
+
+NIXL_LABEL = "DeepSeek-V3-PD-1P1D-TP8-NIXL-vllm-router"
+NIXL_PUSH_LABEL = "DeepSeek-V3-PD-1P1D-TP8-NIXL-PUSH-vllm-router"
+MORIIO_TWIN_LABEL = "DeepSeek-V3-PD-1P1D-TP8-MoRIIO-vllm-router"
+
+
+def test_nixl_steps_land_in_their_enumerated_cells_not_the_unexpected_bucket():
+    grid = build_grid([
+        record(1, label=NIXL_LABEL),
+        record(1, label=NIXL_PUSH_LABEL),
+    ])
+    nixl = cell_by_id(grid, parse_label(NIXL_LABEL).cell_id)
+    push = cell_by_id(grid, parse_label(NIXL_PUSH_LABEL).cell_id)
+    assert (nixl["grid"], push["grid"]) == ("tp8-nixl", "tp8-nixl-push")
+    assert (nixl["transport"], push["transport"]) == ("NIXL", "NIXL-PUSH")
+    assert not [c for c in grid["cells"] if c.get("unexpected")]
+
+
+def test_transport_twins_do_not_collide():
+    # The three differ in transport alone. Before transport became an axis the
+    # renderer keyed cells on (model, shape, mode, router), so one of these
+    # overwrote the others and the MoRIIO table showed a NIXL verdict — wrong
+    # data rendered as if it were right.
+    grid = build_grid([
+        record(1, label=MORIIO_TWIN_LABEL),
+        record(1, state="failed", label=NIXL_LABEL),
+        record(1, state="failed", label=NIXL_PUSH_LABEL),
+    ])
+    verdicts = {
+        c["transport"]: c["last_verdict"]
+        for c in grid["cells"]
+        if c["model"] == "DeepSeek-V3" and c["shape"] == "1P1D"
+        and c["mode"] == "TP8" and c["router"] == "vllm-router"
+    }
+    assert verdicts == {"MoRIIO": "passed", "NIXL": "failed", "NIXL-PUSH": "failed"}
+
+
+def test_no_two_enumerated_cells_share_a_render_key():
+    # The key the dashboard builds its lookup table from. A duplicate here is
+    # invisible on screen: one cell silently replaces the other.
+    keys = Counter(
+        (c["model"], c["shape"], c["mode"], c["transport"], c["router"])
+        for c in expected_cells()
+    )
+    assert [k for k, n in keys.items() if n > 1] == []
+
+
+def test_nixl_grids_are_deepseek_v3_only():
+    models = {
+        c["model"] for c in expected_cells() if c["transport"].startswith("NIXL")
+    }
+    assert models == {"DeepSeek-V3"}
+
+
+def test_v4_pro_is_enumerated_with_its_proxy_gap_visible():
+    cells = [c for c in expected_cells() if c["model"] == "DeepSeek-V4-Pro"]
+    assert cells, "DeepSeek-V4-Pro runs upstream and must be on the grid"
+    # Only the vllm-router steps exist upstream. The proxy cells are enumerated
+    # anyway so the absent coverage renders as never_run instead of vanishing.
+    assert {c["router"] for c in cells} == {"proxy", "vllm-router"}
+    assert all(c["transport"] == "MoRIIO" for c in cells)
+
+
+def test_build_rollup_runs_carry_transport():
+    # Same collision as the grid, one layer up: without transport the MoRIIO
+    # and NIXL runs are indistinguishable rows in the per-build detail.
+    grid = build_grid([
+        record(1, label=MORIIO_TWIN_LABEL),
+        record(1, state="failed", label=NIXL_LABEL),
+    ])
+    runs = grid["build_rollup"][0]["models"]["DeepSeek-V3"]["runs"]
+    assert {r["transport"] for r in runs} == {"MoRIIO", "NIXL"}
+
+
+def test_axes_expose_transports_and_per_grid_transport():
+    axes = build_grid([])["axes"]
+    assert axes["transports"] == ["MoRIIO", "NIXL", "NIXL-PUSH"]
+    # Deprecated scalar, kept one release for consumers not yet migrated.
+    assert axes["transport"] == "MoRIIO"
+    assert all("transport" in g and "models" in g for g in axes["grids"])
 
 
 def test_a_renamed_step_surfaces_as_an_extra_cell():

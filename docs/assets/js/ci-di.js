@@ -234,7 +234,8 @@
       hwRow('Queue', 'amd_mi350_ainic'),
       hwRow('Topology', '1P1D = 2 nodes · 2P2D = 4 nodes'),
       hwRow('Parallelism', modeLabels(g).join('  ·  ') || 'TP8'),
-      hwRow('KV transport', (g.axes || {}).transport || 'MoRIIO'),
+      hwRow('KV transport', ((g.axes || {}).transports
+        || [(g.axes || {}).transport || 'MoRIIO']).join(' · ')),
     ]), 'Fixed for every cell in the grid; the only hardware axis is node count.');
 
     return h('div', { style: { marginBottom: '22px' } }, [
@@ -273,19 +274,22 @@
   function detailRow(row, models, span) {
     var blocks = models.filter(function (m) { return row.models[m]; }).map(function (m) {
       var d = row.models[m];
-      // Mode has to be in the sort key and on screen: from build 47 a model
-      // has both a TP8 and a wide-EP run at 1P1D proxy, and without it the two
-      // rows are indistinguishable.
+      // Mode and transport both have to be in the sort key and on screen: from
+      // build 47 a model has both a TP8 and a wide-EP run at 1P1D proxy, and
+      // from PR #62007 a MoRIIO and a NIXL run at identical shape/mode/router.
+      // Without either field the rows are indistinguishable.
+      var key = function (r) { return r.mode + r.shape + (r.transport || '') + r.router; };
       var runs = d.runs.slice().sort(function (a, b) {
-        return (a.mode + a.shape + a.router).localeCompare(b.mode + b.shape + b.router);
+        return key(a).localeCompare(key(b));
       }).map(function (r) {
         var tag = r.failure_class && r.failure_class !== 'ok' ? r.failure_class : '';
         return h('div', {
           style: { display: 'flex', gap: '10px', alignItems: 'baseline', fontSize: '12px', padding: '2px 0' },
         }, [
           h('span', {
-            text: r.mode + '  ' + r.shape + ' ' + r.router,
-            style: { minWidth: '230px', color: 'var(--text-muted)' },
+            text: r.mode + '  ' + r.shape + ' ' + r.router
+              + (r.transport ? ' · ' + r.transport : ''),
+            style: { minWidth: '280px', color: 'var(--text-muted)' },
           }),
           h('a', {
             text: r.verdict, href: r.job_url || '#', target: '_blank', rel: 'noopener',
@@ -463,22 +467,32 @@
     ]);
   }
 
-  // One table per parallelism mode. mode MUST be part of the lookup key:
-  // DeepSeek-V3|1P1D|EP8/DP8-WideEP|MoRIIO|proxy differs from the TP8 cell in
-  // mode alone, and keying without it lets one silently overwrite the other.
+  // One table per parallelism mode per transport. mode and transport MUST both
+  // be part of the lookup key: DeepSeek-V3|1P1D|EP8/DP8-WideEP|MoRIIO|proxy
+  // differs from the TP8 cell in mode alone, and from the NIXL cell in
+  // transport alone. Keying without either lets one silently overwrite the
+  // other, which renders as a plausible verdict in the wrong table.
   function gridTables(g) {
     var axes = g.axes || {};
     var models = axes.models || [];
     var byKey = {};
     (g.cells || []).forEach(function (c) {
-      byKey[[c.model, c.shape, c.mode, c.router].join('|')] = c;
+      byKey[[c.model, c.shape, c.mode, c.transport, c.router].join('|')] = c;
     });
+    // Schema 2 put transport on axes, not on each grid. That feed still has to
+    // render: this file and grid.json are published separately, so a schema-2
+    // payload is reachable between a deploy and the next collector run. Without
+    // the fallback def.transport is undefined, misses every cell, and the page
+    // reads as "nothing ever ran".
+    var fallback = axes.transport || 'MoRIIO';
     return (axes.grids || []).map(function (def) {
-      return gridTable(def, models, byKey, g.min_samples_for_rate);
+      // A grid may narrow the model list — NIXL runs DeepSeek-V3 only.
+      return gridTable(def, def.models || models, byKey, g.min_samples_for_rate, fallback);
     });
   }
 
-  function gridTable(def, models, byKey, minSamples) {
+  function gridTable(def, models, byKey, minSamples, fallbackTransport) {
+    var transport = def.transport || fallbackTransport;
     // Each shape brings its own mode: within the wide-EP grid 1P1D is EP8/DP8
     // and 2P2D is EP16/DP16, so a grid-level mode would mislabel half the table.
     var cols = [];
@@ -506,7 +520,7 @@
 
     var rows = models.map(function (m) {
       var cells = cols.map(function (c) {
-        return cellBox(byKey[[m, c.shape, c.mode, c.router].join('|')]);
+        return cellBox(byKey[[m, c.shape, c.mode, transport, c.router].join('|')]);
       });
       var name = h('td', {
         style: {
@@ -537,7 +551,7 @@
   }
 
   function cellLine(c) {
-    return c.model + ' · ' + c.shape + ' · ' + c.mode + ' · ' + c.router
+    return c.model + ' · ' + c.shape + ' · ' + c.mode + ' · ' + c.transport + ' · ' + c.router
       + '  —  ' + c.completed + ' run' + (c.completed === 1 ? '' : 's')
       + (c.last_build ? ', last in #' + c.last_build : '');
   }

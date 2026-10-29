@@ -23,9 +23,13 @@ from .di_pipelines import (
     MODELS,
     STEP_TIMEOUT_MINS,
     TRANSPORT,
+    TRANSPORTS,
 )
 
-SCHEMA_VERSION = 2
+# 3: transport moved from a global scalar to a per-grid property, so NIXL and
+# MoRIIO cells can coexist. Cell-ID format is unchanged — transport was always
+# the 4th field, only its source moved — so history survives the upgrade.
+SCHEMA_VERSION = 3
 
 # Verdicts that represent a completed attempt. Everything else (waiting,
 # running, canceled, blocked) is excluded from pass rates: a step that never
@@ -48,8 +52,8 @@ HISTORY_LIMIT = 10
 RECENT_BUILD_WINDOW = 3
 
 
-def _cell_id(model: str, shape: str, mode: str, router: str) -> str:
-    return f"{model}|{shape}|{mode}|{TRANSPORT}|{router}"
+def _cell_id(model: str, shape: str, mode: str, transport: str, router: str) -> str:
+    return f"{model}|{shape}|{mode}|{transport}|{router}"
 
 
 def expected_cells() -> list[dict]:
@@ -61,16 +65,19 @@ def expected_cells() -> list[dict]:
     """
     cells = []
     for grid in GRIDS:
-        for model in MODELS:
+        transport = grid["transport"]
+        for model in grid.get("models", MODELS):
             for col in grid["shapes"]:
                 for router in grid["routers"]:
                     cells.append({
-                        "cell_id": _cell_id(model, col["shape"], col["mode"], router),
+                        "cell_id": _cell_id(
+                            model, col["shape"], col["mode"], transport, router
+                        ),
                         "grid": grid["key"],
                         "model": model,
                         "shape": col["shape"],
                         "mode": col["mode"],
-                        "transport": TRANSPORT,
+                        "transport": transport,
                         "router": router,
                     })
     return cells
@@ -227,6 +234,10 @@ def build_rollup(records: list[dict]) -> list[dict]:
             "shape": r.get("shape", ""),
             "router": r.get("router", ""),
             "mode": r.get("mode", ""),
+            # Same reason mode is here: from PR #62007 a DeepSeek-V3 run has a
+            # MoRIIO and a NIXL variant at identical shape/mode/router, and
+            # without transport the two rows are indistinguishable.
+            "transport": r.get("transport", ""),
             "verdict": verdict,
             "runtime_s": r.get("runtime_s"),
             "job_url": r.get("job_url", ""),
@@ -306,17 +317,24 @@ def build_grid(records: list[dict]) -> dict:
         "pipeline": DI_PIPELINES[DI_KEY],
         "axes": {
             "models": list(MODELS),
+            "transports": list(TRANSPORTS),
+            # Deprecated in schema 3, emitted for one release so a consumer
+            # still reading the scalar does not blank mid-deploy. Read
+            # ``transports`` and each grid's own ``transport`` instead.
             "transport": TRANSPORT,
-            # One entry per rendered grid, each shape carrying its own mode.
-            # A renderer that keys a cell without mode collapses the TP8 and
-            # wide-EP matrices into one; one that hoists mode to the grid gets
-            # wide-EP's 2P2D column wrong.
+            # One entry per rendered grid, each shape carrying its own mode and
+            # each grid its own transport. A renderer that keys a cell without
+            # mode collapses the TP8 and wide-EP matrices into one; one that
+            # omits transport lets a NIXL cell overwrite its MoRIIO twin, which
+            # looks like data rather than like a bug.
             "grids": [
                 {
                     "key": g["key"],
                     "title": g["title"],
+                    "transport": g["transport"],
                     "shapes": [dict(c) for c in g["shapes"]],
                     "routers": list(g["routers"]),
+                    "models": list(g.get("models", MODELS)),
                     "note": g["note"],
                 }
                 for g in GRIDS

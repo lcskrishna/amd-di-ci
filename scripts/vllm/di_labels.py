@@ -6,6 +6,7 @@ Labels look like:
     DeepSeek-V3-PD-1P1D-TP8-MoRIIO-proxy
     DeepSeek-R1-MXFP4-PD-2P2D-TP8-MoRIIO-vllm-router
     DeepSeek-V3-PD-1P1D-EP8/DP8-WideEP-MoRIIO-proxy      (currently disabled)
+    DeepSeek-V3-PD-1P1D-TP8-NIXL-PUSH-vllm-router        (vLLM PR #62007)
 
 Model names and router names both contain hyphens, so splitting on "-" does not
 work. Anchor instead on the two literal separators that are always present: the
@@ -17,8 +18,13 @@ from __future__ import annotations
 import re
 from dataclasses import asdict, dataclass
 
-# Longest-first so a future "MoRIIOv2" cannot be shadowed by "MoRIIO".
-TRANSPORTS = ("MoRIIO", "Mooncake", "NIXL")
+# One transport token is a prefix of another ("NIXL" of "NIXL-PUSH"), so match
+# order decides the answer. Sorted by length at the point of use rather than by
+# hand here: the hand-ordered version read as correct while "NIXL-PUSH" parsed
+# as transport "NIXL" with an invented router "PUSH-vllm-router", and nothing
+# raised — the Cell came back ok=True.
+TRANSPORTS = ("MoRIIO", "Mooncake", "NIXL", "NIXL-PUSH")
+_TRANSPORTS_LONGEST_FIRST = tuple(sorted(TRANSPORTS, key=len, reverse=True))
 
 _PD_SEP = "-PD-"
 _SHAPE = re.compile(r"^(?P<shape>\d+P\d+D)(?:-(?P<rest>.*))?$")
@@ -87,7 +93,7 @@ def parse_label(label: str) -> Cell:
 
     # Split the tail on the transport token: everything left of it describes the
     # parallel shape, everything right of it is the router.
-    for transport in TRANSPORTS:
+    for transport in _TRANSPORTS_LONGEST_FIRST:
         needle = f"-{transport}-"
         idx = tail.find(needle)
         if idx != -1:
