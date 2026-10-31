@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-10-31T05:58:30Z",
+  "generated_at": "2026-10-31T12:49:49Z",
   "pipeline": {
     "slug": "amd-distributed-inference-ci",
     "name_pattern": ".*",
@@ -92,7 +92,7 @@
     {
       "build_number": 132,
       "build_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/132",
-      "state": "failing",
+      "state": "failed",
       "branch": "vllm-project:vllm:main",
       "commit": "7fe793a5d5b7",
       "created_at": "2026-10-30T19:00:00.246Z"
@@ -1261,7 +1261,7 @@
         },
         "DeepSeek-V4-Pro": {
           "passed": 2,
-          "completed": 2,
+          "completed": 3,
           "runs": [
             {
               "shape": "1P1D",
@@ -1292,18 +1292,18 @@
               "router": "vllm-router",
               "mode": "EP16/DP16-WideEP",
               "transport": "MoRIIO",
-              "verdict": "running",
-              "runtime_s": null,
+              "verdict": "failed",
+              "runtime_s": 2740.0,
               "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/132#01a18e2e-f02f-4751-b035-6dfb2aa26ebd",
-              "failure_class": "",
-              "slurm_state": "",
-              "reason": ""
+              "failure_class": "workload",
+              "slurm_state": "FAILED",
+              "reason": "sentinel"
             }
           ]
         },
         "GLM-5.2-FP8": {
           "passed": 4,
-          "completed": 4,
+          "completed": 5,
           "runs": [
             {
               "shape": "1P1D",
@@ -1358,12 +1358,12 @@
               "router": "vllm-router",
               "mode": "EP16/DP16-WideEP",
               "transport": "MoRIIO",
-              "verdict": "waiting",
-              "runtime_s": null,
+              "verdict": "failed",
+              "runtime_s": 2348.5,
               "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/132#01a18e2e-f02f-47b4-8697-c3ab29d7a3f0",
-              "failure_class": "",
-              "slurm_state": "",
-              "reason": ""
+              "failure_class": "workload",
+              "slurm_state": "FAILED",
+              "reason": "sentinel"
             }
           ]
         },
@@ -56904,16 +56904,16 @@
         {
           "build_number": 132,
           "date": "2026-10-30",
-          "verdict": "waiting",
-          "state": "limited",
-          "runtime_s": null,
-          "queue_wait_s": null,
-          "agent_name": "",
+          "verdict": "failed",
+          "state": "failed",
+          "runtime_s": 2348.5,
+          "queue_wait_s": 0.4,
+          "agent_name": "spur-login-atl-4",
           "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/132#01a18e2e-f02f-47b4-8697-c3ab29d7a3f0",
-          "phase": "",
-          "slurm_state": "",
-          "failure_class": "",
-          "reason": ""
+          "phase": "bringup",
+          "slurm_state": "FAILED",
+          "failure_class": "workload",
+          "reason": "sentinel"
         },
         {
           "build_number": 131,
@@ -57043,15 +57043,15 @@
         }
       ],
       "attempts": 30,
-      "completed": 25,
+      "completed": 26,
       "passed": 12,
-      "failed": 13,
-      "pass_rate": 0.48,
+      "failed": 14,
+      "pass_rate": 0.4615,
       "rate_is_reportable": true,
-      "flips": 11,
-      "last_verdict": "passed",
-      "last_build": 130,
-      "median_runtime_s": 1261.0,
+      "flips": 12,
+      "last_verdict": "failed",
+      "last_build": 132,
+      "median_runtime_s": 1266.0,
       "median_queue_wait_s": 0.4
     },
     {
@@ -57200,16 +57200,16 @@
         {
           "build_number": 132,
           "date": "2026-10-30",
-          "verdict": "running",
-          "state": "running",
-          "runtime_s": null,
+          "verdict": "failed",
+          "state": "failed",
+          "runtime_s": 2740.0,
           "queue_wait_s": 0.3,
           "agent_name": "spur-login-atl-4",
           "job_url": "https://buildkite.com/vllm/amd-distributed-inference-ci/builds/132#01a18e2e-f02f-4751-b035-6dfb2aa26ebd",
-          "phase": "",
-          "slurm_state": "",
-          "failure_class": "",
-          "reason": ""
+          "phase": "bringup",
+          "slurm_state": "FAILED",
+          "failure_class": "workload",
+          "reason": "sentinel"
         },
         {
           "build_number": 131,
@@ -57269,15 +57269,15 @@
         }
       ],
       "attempts": 5,
-      "completed": 3,
+      "completed": 4,
       "passed": 2,
-      "failed": 1,
-      "pass_rate": 0.6667,
+      "failed": 2,
+      "pass_rate": 0.5,
       "rate_is_reportable": false,
-      "flips": 2,
-      "last_verdict": "passed",
-      "last_build": 130,
-      "median_runtime_s": 1454.4,
+      "flips": 3,
+      "last_verdict": "failed",
+      "last_build": 132,
+      "median_runtime_s": 1472.9,
       "median_queue_wait_s": 0.3
     },
     {
@@ -57519,9 +57519,9 @@
     },
     {
       "agent_name": "spur-login-atl-4",
-      "completed": 830,
-      "failed": 454,
-      "failure_rate": 0.547
+      "completed": 832,
+      "failed": 456,
+      "failure_rate": 0.5481
     },
     {
       "agent_name": "spur-login-atl-3",
@@ -57540,6 +57540,6 @@
     "bringup": 201,
     "infra": 944,
     "unknown": 268,
-    "workload": 868
+    "workload": 870
   }
 }
