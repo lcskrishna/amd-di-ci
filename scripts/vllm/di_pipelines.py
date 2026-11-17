@@ -64,9 +64,19 @@ MODELS = (
     # Only the three vllm-router steps exist upstream, so the proxy columns
     # stay empty. That is the coverage gap, not a bug in the enumeration.
     "DeepSeek-V4-Pro",
+    # Added upstream in build 150 (2026-11-16), vllm-router only. Until they
+    # were listed here their records landed in the unexpected-steps panel
+    # instead of the grid.
+    "Kimi-K3",
+    "MiniMax-M3.1-Flash-Quark-MXFP4",
 )
 SHAPES = ("1P1D", "2P2D")
 ROUTERS = ("proxy", "vllm-router")
+
+# Steps that exist only behind vllm-router. ``proxy`` is the MoRI host proxy,
+# which these configurations have no equivalent for, so the narrower column set
+# is "not applicable" rather than an untested gap.
+_ROUTER_ONLY = ("vllm-router",)
 
 # One grid per parallelism family, rendered top to bottom in this order.
 #
@@ -102,15 +112,28 @@ WIDE_EP_SHAPES = (
     {"shape": "2P2D", "mode": "EP16/DP16-WideEP", "mode_label": "EP16/DP16"},
 )
 
+# TP4 arrived in build 150 as a single step. It gets its own grid rather than a
+# third column on the TP8 one because every other model would carry an empty
+# TP4 cell that reads as a coverage gap, and it is not one — no other model has
+# a TP4 configuration proposed.
+TP4_SHAPES = ({"shape": "1P1D", "mode": "TP4", "mode_label": "TP4"},)
+
+# ``model_labels`` renames a row at render time only. The cell key stays the
+# label-derived model name, so history survives the rename — which it would not
+# if the model string itself were edited to carry the annotation.
+_MONODECODE_LABELS = {
+    "MiniMax-M3.1-Flash-Quark-MXFP4": "MiniMax M3.1-Flash (with Monodecode)",
+}
+
 # NIXL runs DeepSeek-V3 only, and only behind vllm-router: the ``proxy`` option
 # is the MoRI proxy, which has no NIXL equivalent. So the narrower column set
 # here is "not applicable", not an untested gap — unlike the empty shapes
 # above, which are.
 _NIXL_MODELS = ("DeepSeek-V3",)
-_NIXL_ROUTERS = ("vllm-router",)
+_NIXL_ROUTERS = _ROUTER_ONLY
 _NIXL_NOTE = (
-    "Pending vLLM PR #62007 (open). Until it merges these cells read "
-    "'never run' because the steps do not exist yet, not because they fail."
+    "Live since vLLM PR #62007 merged (2026-10-30). These cells carry real "
+    "verdicts; a red one is a failure, not a missing step."
 )
 
 GRIDS = (
@@ -121,6 +144,19 @@ GRIDS = (
         "shapes": TP8_SHAPES,
         "routers": ROUTERS,
         "note": "The original matrix. 1P1D = 2 nodes, 2P2D = 4 nodes.",
+    },
+    {
+        "key": "tp4-monodecode",
+        "transport": "MoRIIO",
+        "title": "PD Disagg with TP4 · MoRIIO",
+        "shapes": TP4_SHAPES,
+        "routers": _ROUTER_ONLY,
+        "models": ("MiniMax-M3.1-Flash-Quark-MXFP4",),
+        "model_labels": _MONODECODE_LABELS,
+        "note": "Added in build 150 (2026-11-16). The TP4 configuration is the "
+                "monodecode-kernel run; the Buildkite step label is unchanged "
+                "(…-PD-1P1D-TP4-MoRIIO-vllm-router) and only the row name here "
+                "records which kernels it exercises.",
     },
     {
         "key": "wide-ep",
@@ -134,15 +170,9 @@ GRIDS = (
     },
 )
 
-# Not rendered yet. vLLM PR #62007 is still open, so these six steps do not
-# exist upstream and four grids of "never run" would be noise rather than a
-# coverage gap. Append to GRIDS to turn them on once the PR merges:
-#
-#     GRIDS = GRIDS + NIXL_GRIDS
-#
-# Until then a NIXL record, if one appears early, lands in the unexpected-steps
-# panel with its transport correctly parsed — captured and visible, not folded
-# into a MoRIIO cell.
+# Appended to GRIDS below. vLLM PR #62007 merged on 2026-10-30, so these steps
+# now run and carry real verdicts; before that they were held back because four
+# grids of "never run" would have read as noise rather than a coverage gap.
 NIXL_GRIDS = (
     {
         "key": "tp8-nixl",
@@ -183,6 +213,8 @@ NIXL_GRIDS = (
         "note": _NIXL_NOTE,
     },
 )
+
+GRIDS = GRIDS + NIXL_GRIDS
 
 # Transport is a grid property rather than a global constant because a NIXL cell
 # shares model, shape, mode and router with its MoRIIO twin and differs only by

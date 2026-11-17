@@ -335,6 +335,10 @@ def build_grid(records: list[dict]) -> dict:
                     "shapes": [dict(c) for c in g["shapes"]],
                     "routers": list(g["routers"]),
                     "models": list(g.get("models", MODELS)),
+                    # Render-time row renames only. Keyed by the same model
+                    # string the cell IDs use, so a renamed row keeps its
+                    # history instead of starting over as a new cell.
+                    "model_labels": dict(g.get("model_labels", {})),
                     "note": g["note"],
                 }
                 for g in GRIDS

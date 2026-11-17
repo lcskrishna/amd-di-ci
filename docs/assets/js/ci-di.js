@@ -256,6 +256,11 @@
 
   // ── Build x model ────────────────────────────────────────────────────────
 
+  // The rollup carries every build ever collected (136 and growing), which as
+  // one table dominates the page height. Paged rather than truncated so the
+  // older builds stay reachable.
+  var BUILD_ROWS = 20;
+
   // Read the rollup the collector emits rather than folding up cell.history:
   // that field is capped at the flaky window, so the middle builds are absent
   // from it and a table built that way would show holes.
@@ -323,6 +328,7 @@
 
   function buildModelTable(g) {
     var models = (g.axes || {}).models || [];
+    // Newest-first, so page 1 is the most recent builds.
     var rows = pivot(g);
     if (!rows.length) return null;
 
@@ -341,8 +347,7 @@
       .concat(models.map(function (m) { return th(m, true); }))
       .concat([th('Total', true)]));
 
-    var body = [];
-    rows.forEach(function (r) {
+    function renderRow(r) {
       var tp = 0, tt = 0;
       var cells = models.map(function (m) {
         var d = r.models[m];
@@ -382,15 +387,58 @@
         var caret = tr.querySelector('span');
         if (caret) caret.textContent = open ? '▸ ' : '▾ ';
       });
-      body.push(tr, detail);
+      return [tr, detail];
+    }
+
+    var pages = Math.ceil(rows.length / BUILD_ROWS);
+    var page = 0;
+    var tbody = h('tbody', {}, []);
+
+    var btn = function (label, delta) {
+      var b = h('button', {
+        text: label,
+        style: {
+          padding: '3px 10px', fontSize: '12px', cursor: 'pointer',
+          background: 'var(--card-bg)', color: 'var(--text)',
+          border: '1px solid var(--border)', borderRadius: '4px',
+        },
+      });
+      b.addEventListener('click', function () { paint(page + delta); });
+      return b;
+    };
+    var prev = btn('‹ Newer', -1);
+    var next = btn('Older ›', 1);
+    var status = h('span', {
+      style: { fontSize: '12px', color: 'var(--text-muted)' },
     });
+
+    function paint(p) {
+      page = Math.max(0, Math.min(p, pages - 1));
+      var slice = rows.slice(page * BUILD_ROWS, (page + 1) * BUILD_ROWS);
+      tbody.replaceChildren();
+      // Each build contributes a summary row plus its collapsed detail row.
+      slice.forEach(function (r) { renderRow(r).forEach(function (n) { tbody.append(n); }); });
+      status.textContent = 'builds #' + slice[slice.length - 1].build_number
+        + '–#' + slice[0].build_number
+        + '   ·   page ' + (page + 1) + ' of ' + pages;
+      prev.disabled = page === 0;
+      next.disabled = page >= pages - 1;
+      [prev, next].forEach(function (b) { b.style.opacity = b.disabled ? '0.4' : '1'; });
+    }
+    paint(0);
 
     return h('div', { style: { marginBottom: '22px', overflowX: 'auto' } }, [
       h('h3', { text: 'Builds × models', style: { margin: '0 0 8px', fontSize: '15px' } }),
       h('table', { style: { width: '100%', borderCollapse: 'collapse', fontSize: '14px' } }, [
         h('thead', {}, [head]),
-        h('tbody', {}, body),
+        tbody,
       ]),
+      h('div', {
+        style: {
+          display: 'flex', alignItems: 'center', gap: '10px',
+          marginTop: '8px', flexWrap: 'wrap',
+        },
+      }, [prev, next, status]),
       h('div', {
         text: 'passed/completed across every cell that ran in that build, all modes. '
           + 'Click a build to expand each step, its runtime, and the SLURM failure class. '
@@ -527,7 +575,7 @@
           padding: '8px', fontSize: '13px', fontWeight: '600',
           whiteSpace: 'nowrap', borderTop: '1px solid var(--border)',
         },
-      }, [h('span', { text: m })]);
+      }, [h('span', { text: (def.model_labels || {})[m] || m, title: m })]);
       return h('tr', {}, [name].concat(cells));
     });
 
